@@ -15,6 +15,3 @@ learning_path_templates = {
     ],
     # Add more goals here...
 }
-
-def generate_learning_path(goal):
-    return learning_path_templates.get(goal, [])

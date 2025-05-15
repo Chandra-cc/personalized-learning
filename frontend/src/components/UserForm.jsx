@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { submitUserData } from "../api/api";
 
-const UserForm = () => {
+const UserForm = ({ userId }) => {  // receive userId as prop
   const [formData, setFormData] = useState({
     age: "",
     gender: "",
@@ -19,11 +19,18 @@ const UserForm = () => {
   // Replace your existing handleSubmit with this:
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await submitUserData(formData);
+
+    // Include userId in payload
+    const payload = {
+      ...formData,
+      user_id: userId,
+    };
+
+    const response = await submitUserData(payload);
 
     if (response?.message === "User data submitted successfully") {
       setMessage(response.message);
-      setLearningPath(response.learning_path || []);  // Update learning path state here
+      setLearningPath(response.learning_path || []);
     } else {
       setMessage("Submission failed");
     }
