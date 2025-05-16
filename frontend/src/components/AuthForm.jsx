@@ -27,19 +27,26 @@ const AuthForm = ({ onAuthSuccess }) => {
   };
 
   return (
-    <div className="relative w-screen h-screen">
-      {/* Background Image */}
+    <div className="relative w-screen h-screen flex items-center justify-start">
+      {/* Background image */}
       <img
         src={loginImage}
         alt="Login Background"
-        className="absolute top-0 left-0 w-full h-full object-cover"
+        className="fixed inset-0 w-screen h-screen object-cover z-0"
       />
 
-      {/* Overlay for slight dim effect (optional) */}
-      <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-40" />
+      {/* Overlay for slight dim effect */}
+      <div className="absolute inset-0 w-screen h-screen bg-black bg-opacity-50" />
+
+      {/* Company Header */}
+      <header className="fixed top-0 left-0 w-screen bg-black bg-opacity-90 text-white px-10 py-6 z-20 flex items-center shadow-md">
+      <h1 className="text-5xl font-bold tracking-wide text-white drop-shadow-lg font-poppins">
+        E-learning.ai
+      </h1>
+      </header>
 
       {/* Login Form */}
-      <div className="relative z-10 flex items-center h-full px-10 md:px-20">
+      <div className="relative z-10 flex items-center h-full px-10 md:px-20 pt-24">
         <form
           onSubmit={handleSubmit}
           className="w-full max-w-md bg-transparent text-white space-y-6 animate-fade-in"

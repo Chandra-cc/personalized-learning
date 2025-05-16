@@ -18,4 +18,63 @@
       transform: translateY(0);
     }
   }
+
+/* Loader spinner */
+.loader {
+  border-top-color: #3b82f6; /* blue-500 */
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Scrollbar for modern look */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #2563eb #1f2937; /* thumb blue-600, track gray-800 */
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #2563eb;
+  border-radius: 20px;
+  border: 3px solid #1f2937;
+}
+
+/* Light theme scrollbar */
+.light .scrollbar-thumb-blue-500::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+}
+.light .scrollbar-track-gray-300::-webkit-scrollbar-track {
+  background: #d1d5db;
+}
+
+/* Add smooth background and text color transition */
+html {
+  transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+@keyframes pulse-once {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.03);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .animate-pulse-once {
+    animation: pulse-once 0.5s ease-in-out;
+  }
+  
+
   
