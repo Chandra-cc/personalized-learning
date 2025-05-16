@@ -9,3 +9,4 @@ class User(db.Model):
     education = db.Column(db.String(100))
     goal = db.Column(db.String(255))
     learning_path = db.Column(db.Text)  # JSON string
+    progress = db.Column(db.Text)  # JSON string, e.g., {"0": true, "1": false}
