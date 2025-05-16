@@ -46,7 +46,7 @@ const Dashboard = ({ userId }) => {
   const completedCount = Object.values(progress).filter(Boolean).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
+    <div className="flex h-screen bg-gray-900 text-white">
       <aside className="w-64 bg-gray-800 p-6 shadow-xl">
         <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
         <p className="text-sm text-gray-400">Email: {userData.email}</p>

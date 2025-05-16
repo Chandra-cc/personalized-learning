@@ -1,17 +1,17 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
-  darkMode: "class",
   theme: {
     extend: {
-      colors: {
-        primary: "#1e3a8a", // Custom blue
-        accent: "#10b981",  // Custom green
-      },
       animation: {
-        fade: "fadeIn 0.6s ease-in-out",
-        slide: "slideIn 0.5s ease-in-out",
+        'fade-in': 'fadeIn 0.8s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateY(10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
       },
     },
   },
   plugins: [],
-};
+}
