@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import loginImage from "../assets/img1.jpg"; // Ensure this image exists
 
-const AuthForm = ({ onAuthSuccess }) => {
+const AuthForm = ({ onAuthSuccess, onBackHome }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [mode, setMode] = useState("login");
   const [message, setMessage] = useState("");
@@ -35,17 +35,27 @@ const AuthForm = ({ onAuthSuccess }) => {
         className="fixed inset-0 w-screen h-screen object-cover z-0"
       />
 
-      {/* Overlay for slight dim effect */}
+      {/* Overlay */}
       <div className="absolute inset-0 w-screen h-screen bg-black bg-opacity-50" />
 
-      {/* Company Header */}
-      <header className="fixed top-0 left-0 w-screen bg-black bg-opacity-90 text-white px-10 py-6 z-20 flex items-center shadow-md">
-      <h1 className="text-5xl font-bold tracking-wide text-white drop-shadow-lg font-poppins">
-        E-learning.ai
-      </h1>
+      {/* Header with clickable company title */}
+      <header className="fixed top-0 left-0 w-screen bg-black bg-opacity-90 text-white px-10 py-6 z-20 flex items-center shadow-md cursor-pointer select-none"
+        onClick={() => onBackHome && onBackHome()}
+        title="Go to Home"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onBackHome && onBackHome();
+          }
+        }}
+      >
+        <h1 className="text-5xl font-bold tracking-wide text-white drop-shadow-lg font-poppins">
+          E-learning.ai
+        </h1>
       </header>
 
-      {/* Login Form */}
+      {/* Form container */}
       <div className="relative z-10 flex items-center h-full px-10 md:px-20 pt-24">
         <form
           onSubmit={handleSubmit}

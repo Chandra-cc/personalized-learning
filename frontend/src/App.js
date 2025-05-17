@@ -3,11 +3,13 @@ import axios from "axios";
 import UserForm from "./components/UserForm";
 import AuthForm from "./components/AuthForm";
 import Dashboard from "./components/Dashboard";
+import CompanyPage from "./components/CompanyPage";
 
 function App() {
   const [userId, setUserId] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showLanding, setShowLanding] = useState(true); // New state for landing page
 
   const checkFormSubmitted = async (id) => {
     try {
@@ -34,6 +36,7 @@ function App() {
     const storedUserId = localStorage.getItem("user_id");
     if (storedUserId) {
       setUserId(storedUserId);
+      setShowLanding(false);
       checkFormSubmitted(storedUserId);
     } else {
       setLoading(false);
@@ -57,6 +60,7 @@ function App() {
     setFormSubmitted(false);
     localStorage.removeItem("user_id");
     localStorage.removeItem("form_submitted");
+    setShowLanding(true);
   };
 
   if (loading) {
@@ -67,18 +71,20 @@ function App() {
     );
   }
 
+  if (showLanding) {
+    return <CompanyPage onStart={() => setShowLanding(false)} />;
+  }
+
   return (
     <div className="h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
       {userId ? (
-        <>
-          {!formSubmitted ? (
-            <UserForm userId={userId} onSubmitSuccess={handleFormSubmitSuccess} />
-          ) : (
-            <Dashboard userId={userId} onLogout={handleLogout} />
-          )}
-        </>
+        !formSubmitted ? (
+          <UserForm userId={userId} onSubmitSuccess={handleFormSubmitSuccess} />
+        ) : (
+          <Dashboard userId={userId} onLogout={handleLogout} />
+        )
       ) : (
-        <AuthForm onAuthSuccess={handleAuthSuccess} />
+        <AuthForm onAuthSuccess={handleAuthSuccess} onBackHome={() => setShowLanding(true)} />
       )}
     </div>
   );
