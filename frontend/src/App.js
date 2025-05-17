@@ -7,15 +7,12 @@ import Dashboard from "./components/Dashboard";
 function App() {
   const [userId, setUserId] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
-  // Fetch user profile and decide if form submitted
   const checkFormSubmitted = async (id) => {
     try {
       const res = await axios.get(`http://localhost:5000/user/${id}`);
       const learningPath = res.data.learning_path;
-
-      // learningPath is a JSON string stored in DB, parse it safely
       const path = learningPath ? JSON.parse(learningPath) : [];
 
       if (Array.isArray(path) && path.length > 0) {
@@ -71,19 +68,13 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+    <div className="h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
       {userId ? (
         <>
-          <button
-            onClick={handleLogout}
-            className="mb-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
           {!formSubmitted ? (
             <UserForm userId={userId} onSubmitSuccess={handleFormSubmitSuccess} />
           ) : (
-            <Dashboard userId={userId} />
+            <Dashboard userId={userId} onLogout={handleLogout} />
           )}
         </>
       ) : (

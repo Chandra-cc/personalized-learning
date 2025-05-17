@@ -1,21 +1,53 @@
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { FaCheckCircle, FaBook, FaClock, FaMoon, FaSun } from "react-icons/fa";
-import "../styles/animations.css";
+import {
+  FaCheckCircle,
+  FaBook,
+  FaClock,
+  FaSignOutAlt,
+  FaUserCircle,
+  FaChevronDown,
+} from "react-icons/fa";
 
-const Dashboard = ({ userId }) => {
+const UserDetailsModal = ({ isOpen, onClose, userData }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg p-8 max-w-md w-full shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-2xl font-bold mb-4">User Details</h2>
+        <div className="space-y-3 text-gray-700">
+          <p><strong>Email:</strong> {userData.email}</p>
+          <p><strong>Goal:</strong> {userData.goal || "N/A"}</p>
+          <p><strong>Age:</strong> {userData.age || "N/A"}</p>
+          <p><strong>Education:</strong> {userData.education || "N/A"}</p>
+          {/* Add any other signup info fields you have */}
+        </div>
+        <button
+          onClick={onClose}
+          className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const Dashboard = ({ userId, onLogout }) => {
   const [userData, setUserData] = useState(null);
   const [progress, setProgress] = useState({});
   const [loading, setLoading] = useState(true);
   const [updatingStep, setUpdatingStep] = useState(null);
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem("theme") || "dark"
-  );
-
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
-    document.documentElement.classList.toggle("light", theme === "light");
-  }, [theme]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +64,22 @@ const Dashboard = ({ userId }) => {
     fetchData();
   }, [userId]);
 
+  useEffect(() => {
+    // Close dropdown on outside click
+    function handleClickOutside(event) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleComplete = async (index) => {
     setUpdatingStep(index);
     try {
@@ -46,21 +94,28 @@ const Dashboard = ({ userId }) => {
     }
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+  const handleLogout = () => {
+    if (onLogout) onLogout();
+  };
+
+  const toggleDropdown = () => setDropdownOpen((open) => !open);
+
+  const openUserDetails = () => {
+    setModalOpen(true);
+    setDropdownOpen(false);
   };
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 text-white text-xl font-semibold">
-        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
+      <div className="flex justify-center items-center h-screen bg-gray-100 text-gray-700 text-xl font-semibold">
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-300 h-24 w-24"></div>
         <span className="ml-6">Loading dashboard...</span>
       </div>
     );
 
   if (!userData)
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 text-red-500 text-xl font-semibold">
+      <div className="flex justify-center items-center h-screen bg-gray-100 text-red-600 text-xl font-semibold">
         Failed to load data.
       </div>
     );
@@ -70,109 +125,132 @@ const Dashboard = ({ userId }) => {
   const progressPercent = steps.length ? (completedCount / steps.length) * 100 : 0;
 
   return (
-    <div className="flex h-screen transition-colors duration-700 bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 light:bg-gray-100 light:text-gray-900 overflow-hidden">
+    <div className="flex h-screen w-full bg-gray-50 text-gray-800 font-sans">
       {/* Sidebar */}
-      <aside className="w-72 bg-white bg-opacity-10 backdrop-blur-md rounded-r-3xl shadow-lg p-8 flex flex-col justify-between border-l border-blue-600/30 light:bg-white light:bg-opacity-40 light:border-blue-400">
+      <aside className="w-66 bg-white border-r border-gray-200 flex flex-col justify-between shadow-lg">
         <div>
-          <h2 className="text-4xl font-extrabold mb-8 tracking-wide text-blue-400 drop-shadow-lg light:text-blue-600">
-            E-Learning.AI
-          </h2>
-          <div className="mb-8 space-y-2">
-            <p className="text-blue-300 font-semibold uppercase tracking-widest light:text-blue-600">
-              Email
-            </p>
-            <p className="truncate text-white font-medium light:text-gray-800">{userData.email}</p>
+          <div className="px-8 py-6 border-b border-gray-200 flex items-center gap-3">
+            <FaBook className="text-blue-600 text-3xl" />
+            <h1 className="text-2xl font-extrabold text-gray-900">E-Learning.AI</h1>
           </div>
-          <div className="mb-8 space-y-2">
-            <p className="text-blue-300 font-semibold uppercase tracking-widest light:text-blue-600">
-              Learning Goal
-            </p>
-            <p className="capitalize text-white font-medium light:text-gray-800">{userData.goal}</p>
-          </div>
-          <div>
-            <p className="text-blue-300 font-semibold uppercase tracking-widest mb-3 light:text-blue-600">
-              Progress
-            </p>
-            <div className="w-full bg-blue-900 bg-opacity-30 rounded-full h-5 light:bg-blue-300 light:bg-opacity-30">
+
+          <nav className="px-8 py-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Progress</p>
+              <span className="text-sm font-semibold text-gray-700">{completedCount} / {steps.length}</span>
+            </div>
+
+            <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className="bg-blue-500 h-5 rounded-full transition-all duration-700 shadow-[0_0_10px_#3b82f6] light:bg-blue-600"
+                className="absolute left-0 top-0 h-4 bg-blue-600 transition-all duration-700 rounded-full"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className="text-right text-sm text-blue-300 mt-1 font-semibold light:text-blue-700">
-              {completedCount} / {steps.length} Steps Completed
-            </p>
-          </div>
+          </nav>
         </div>
 
-        <div className="flex justify-center mt-10">
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-5 py-3 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold shadow-lg light:bg-blue-500 light:hover:bg-blue-600"
-          >
-            {theme === "dark" ? <FaSun /> : <FaMoon />}
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-          </button>
-        </div>
-
-        <footer className="text-center text-blue-500 text-xs mt-auto font-mono select-none light:text-blue-700">
+        <footer className="px-8 py-6 border-t border-gray-200 text-gray-500 text-xs text-center select-none">
           &copy; 2025 E-Learning.AI
         </footer>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-12 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-600 scrollbar-track-gray-800 light:scrollbar-thumb-blue-500 light:scrollbar-track-gray-300">
-        <h2 className="text-5xl font-extrabold mb-10 tracking-tight text-blue-400 drop-shadow-lg flex items-center gap-3 light:text-blue-600">
-          <FaBook /> Your Learning Path
-        </h2>
+      <div className="flex flex-col flex-1">
+        {/* Header */}
+        <header className="flex justify-between items-center px-10 py-5 border-b border-gray-200 bg-white shadow-sm relative">
+          <h2 className="text-3xl font-semibold text-gray-900">Dashboard</h2>
+          <div
+            ref={dropdownRef}
+            className="relative flex items-center gap-3 cursor-pointer select-none"
+            onClick={toggleDropdown}
+          >
+            <FaUserCircle className="text-3xl text-gray-600" />
+            <span className="font-medium text-gray-700">{userData.email}</span>
+            <FaChevronDown
+              className={`text-gray-500 transition-transform duration-200 ${
+                dropdownOpen ? "rotate-180" : "rotate-0"
+              }`}
+            />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {steps.map((step, index) => {
-            const isCompleted = progress[index];
-            return (
-              <div
-                key={index}
-                className={`p-8 rounded-3xl shadow-lg transform transition-transform duration-300 hover:scale-[1.05] ${
-                  isCompleted
-                    ? "bg-green-900 bg-opacity-90 shadow-green-700/60 border border-green-500 light:bg-green-400 light:bg-opacity-30 light:shadow-green-400/40 light:border-green-500"
-                    : "bg-white bg-opacity-10 backdrop-blur-md border border-blue-700/40 light:bg-white light:bg-opacity-40 light:border-blue-400"
-                }`}
-              >
-                <h3 className="text-3xl font-semibold mb-3 flex items-center gap-3 text-white light:text-gray-900">
-                  Step {index + 1}: {step.title}{" "}
-                  {isCompleted && <FaCheckCircle className="text-green-400" />}
-                </h3>
-                <p className="text-blue-300 italic mb-5 flex items-center gap-2 text-lg light:text-blue-700">
-                  <FaClock /> {step.duration}
-                </p>
-                <a
-                  href={step.resource}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mb-6 text-blue-400 hover:text-blue-600 font-semibold underline light:text-blue-600 light:hover:text-blue-800"
-                >
-                  Visit Resource
-                </a>
+            {/* Dropdown Menu */}
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-12 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
                 <button
-                  disabled={isCompleted || updatingStep === index}
-                  onClick={() => handleComplete(index)}
-                  className={`w-full py-4 rounded-xl font-bold tracking-wide text-lg transition-colors duration-300 shadow-lg ${
-                    isCompleted
-                      ? "bg-green-600 text-white cursor-default shadow-green-500/80"
-                      : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/80 light:bg-blue-500 light:hover:bg-blue-600"
-                  }`}
+                  onClick={openUserDetails}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-100 text-gray-700 font-semibold"
                 >
-                  {isCompleted
-                    ? "✅ Completed"
-                    : updatingStep === index
-                    ? "Updating..."
-                    : "Mark as Complete"}
+                  View Details
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-100 text-red-600 font-semibold"
+                >
+                  Logout
                 </button>
               </div>
-            );
-          })}
-        </div>
-      </main>
+            )}
+          </div>
+        </header>
+
+        {/* Steps Content */}
+        <main className="flex-1 overflow-y-auto p-10 bg-gray-50">
+          <h3 className="text-4xl font-bold mb-8 flex items-center gap-3 text-gray-900">
+            <FaBook className="text-blue-600" /> Your Learning Path
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {steps.map((step, index) => {
+              const isCompleted = progress[index];
+              return (
+                <div
+                  key={index}
+                  className={`bg-white p-6 rounded-xl shadow-md transition-transform hover:scale-[1.03] border ${
+                    isCompleted
+                      ? "border-green-400 bg-green-50"
+                      : "border-gray-200"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className={`text-xl font-semibold ${isCompleted ? "text-green-700" : "text-gray-900"}`}>
+                      Step {index + 1}: {step.title}
+                    </h4>
+                    {isCompleted && <FaCheckCircle className="text-green-500 text-xl" />}
+                  </div>
+                  <p className="flex items-center gap-2 mb-5 text-gray-600 italic">
+                    <FaClock /> {step.duration}
+                  </p>
+                  <a
+                    href={step.resource}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mb-6 text-blue-600 hover:text-blue-800 font-semibold underline"
+                  >
+                    Visit Resource
+                  </a>
+                  <button
+                    disabled={isCompleted || updatingStep === index}
+                    onClick={() => handleComplete(index)}
+                    className={`w-full py-3 rounded-lg font-semibold text-white transition ${
+                      isCompleted
+                        ? "bg-green-500 cursor-default"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                  >
+                    {isCompleted ? "Completed" : updatingStep === index ? "Updating..." : "Mark as Complete"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </main>
+
+        {/* User Details Modal */}
+        <UserDetailsModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          userData={userData}
+        />
+      </div>
     </div>
   );
 };
