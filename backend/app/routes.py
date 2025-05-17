@@ -6,8 +6,19 @@ import json
 
 main = Blueprint('main', __name__)
 
+from fuzzywuzzy import process
+
+def get_closest_goal(user_input, available_goals):
+    match, score = process.extractOne(user_input, available_goals)
+    return match if score > 65 else None  # 70 is a confidence threshold
+
+
 def generate_learning_path(goal):
-    return learning_path_templates.get(goal, [])
+    all_goals = list(learning_path_templates.keys())
+
+    matched_goal = get_closest_goal(goal, all_goals)
+    print("Matched goal:", matched_goal)  # Debugging line
+    return learning_path_templates.get(matched_goal, [])
 
 # ----------------- AUTH -----------------
 
