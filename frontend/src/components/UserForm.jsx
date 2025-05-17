@@ -17,16 +17,12 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
   const [message, setMessage] = useState("");
   const [showSuggestions, setShowSuggestions] = useState({ education: false, goal: false });
 
-  // Refs for the suggestion dropdowns
   const educationRef = useRef(null);
   const goalRef = useRef(null);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        educationRef.current && !educationRef.current.contains(event.target)
-      ) {
+      if (educationRef.current && !educationRef.current.contains(event.target)) {
         setShowSuggestions((s) => ({ ...s, education: false }));
       }
       if (goalRef.current && !goalRef.current.contains(event.target)) {
@@ -55,7 +51,7 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
     const response = await submitUserData(payload);
 
     if (response?.message === "User data submitted successfully") {
-      setMessage(`Awesome! You're among the top learners targeting ${formData.goal}. 🚀`);
+      setMessage(`Awesome! You're among the top learners targeting ${formData.goal} at E-learning.ai 🚀`);
       if (onSubmitSuccess) onSubmitSuccess();
     } else {
       setMessage("Something went wrong. Please try again.");
@@ -63,9 +59,19 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
   };
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-900 via-indigo-900 to-purple-900 px-4 text-white">
-      <div className="w-full max-w-2xl bg-gray-800/90 backdrop-blur-xl p-10 rounded-3xl shadow-2xl slide-up">
-        <h2 className="text-4xl font-extrabold text-center mb-8">Let's Get to Know You</h2>
+    <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#1e1e1e] to-[#2b2b2b] text-white px-4 font-sans">
+      <div className="w-full max-w-2xl bg-gradient-to-br from-[#2d2d2d] to-[#3a3a3a] p-10 rounded-3xl shadow-2xl border border-gray-700 backdrop-blur-sm">
+
+        {/* Header */}
+        <div
+          className="mb-10 text-center cursor-pointer"
+          onClick={() => window.location.replace("/")}
+        >
+          <h1 className="text-4xl font-extrabold tracking-wide text-indigo-400 hover:text-indigo-300 transition">
+            E-learning.ai
+          </h1>
+          <p className="mt-2 text-lg text-gray-300">Let’s build your learning path</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <input
@@ -75,7 +81,7 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
             value={formData.age}
             onChange={handleChange}
             required
-            className="w-full p-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-4 bg-[#444] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
 
           <select
@@ -83,7 +89,7 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
             value={formData.gender}
             onChange={handleChange}
             required
-            className="w-full p-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full p-4 bg-[#444] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">Select your gender</option>
             <option>Male</option>
@@ -101,10 +107,10 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
               onChange={handleChange}
               required
               autoComplete="off"
-              className="w-full p-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 bg-[#444] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             {showSuggestions.education && (
-              <ul className="absolute z-10 bg-gray-800 w-full mt-1 rounded-lg shadow-lg">
+              <ul className="absolute z-20 bg-[#555] w-full mt-1 rounded-lg shadow-md border border-gray-600 max-h-40 overflow-y-auto">
                 {suggestions.education
                   .filter((e) =>
                     e.toLowerCase().includes(formData.education.toLowerCase())
@@ -112,7 +118,7 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
                   .map((option, idx) => (
                     <li
                       key={idx}
-                      className="px-4 py-2 hover:bg-indigo-600 cursor-pointer"
+                      className="px-4 py-2 hover:bg-indigo-600 cursor-pointer transition"
                       onClick={() => handleSuggestionClick("education", option)}
                     >
                       {option}
@@ -131,10 +137,10 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
               onChange={handleChange}
               required
               autoComplete="off"
-              className="w-full p-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-4 bg-[#444] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             {showSuggestions.goal && (
-              <ul className="absolute z-10 bg-gray-800 w-full mt-1 rounded-lg shadow-lg">
+              <ul className="absolute z-20 bg-[#555] w-full mt-1 rounded-lg shadow-md border border-gray-600 max-h-40 overflow-y-auto">
                 {suggestions.goal
                   .filter((g) =>
                     g.toLowerCase().includes(formData.goal.toLowerCase())
@@ -142,7 +148,7 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
                   .map((option, idx) => (
                     <li
                       key={idx}
-                      className="px-4 py-2 hover:bg-indigo-600 cursor-pointer"
+                      className="px-4 py-2 hover:bg-indigo-600 cursor-pointer transition"
                       onClick={() => handleSuggestionClick("goal", option)}
                     >
                       {option}
@@ -154,14 +160,14 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
 
           <button
             type="submit"
-            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold text-lg"
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold text-lg transition"
           >
             Submit and Start My Journey
           </button>
         </form>
 
         {message && (
-          <p className="mt-6 text-center text-green-400 font-medium text-lg animate-fade-in">
+          <p className="mt-6 text-center text-indigo-400 font-medium text-lg animate-fade-in">
             {message}
           </p>
         )}
