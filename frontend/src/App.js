@@ -9,7 +9,7 @@ function App() {
   const [userId, setUserId] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showLanding, setShowLanding] = useState(true); // New state for landing page
+  const [showLanding, setShowLanding] = useState(true); // Landing page toggle
 
   const checkFormSubmitted = async (id) => {
     try {
@@ -65,7 +65,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#1e1e1e] text-white">
         Loading...
       </div>
     );
@@ -76,15 +76,26 @@ function App() {
   }
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-[#1e1e1e] text-white">
       {userId ? (
         !formSubmitted ? (
-          <UserForm userId={userId} onSubmitSuccess={handleFormSubmitSuccess} />
+          <UserForm
+            userId={userId}
+            onSubmitSuccess={handleFormSubmitSuccess}
+            onBackHome={() => {
+              setUserId(null);
+              localStorage.removeItem("user_id");
+              setShowLanding(true);
+            }}
+          />
         ) : (
           <Dashboard userId={userId} onLogout={handleLogout} />
         )
       ) : (
-        <AuthForm onAuthSuccess={handleAuthSuccess} onBackHome={() => setShowLanding(true)} />
+        <AuthForm
+          onAuthSuccess={handleAuthSuccess}
+          onBackHome={() => setShowLanding(true)}
+        />
       )}
     </div>
   );

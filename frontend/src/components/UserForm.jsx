@@ -7,7 +7,7 @@ const suggestions = {
   goal: ["Data Scientist", "Software Engineer", "AI Researcher", "Product Manager", "UX Designer", "Entrepreneur"],
 };
 
-const UserForm = ({ userId, onSubmitSuccess }) => {
+const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
   const [formData, setFormData] = useState({
     age: "",
     gender: "",
@@ -15,6 +15,8 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
     goal: "",
   });
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState({ education: false, goal: false });
 
   const educationRef = useRef(null);
@@ -38,6 +40,7 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
     if (e.target.name in showSuggestions) {
       setShowSuggestions({ ...showSuggestions, [e.target.name]: true });
     }
+    setError(""); // Clear error on change
   };
 
   const handleSuggestionClick = (field, value) => {
@@ -47,14 +50,26 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = { ...formData, user_id: userId };
-    const response = await submitUserData(payload);
+    setLoading(true);
+    setError("");
+    setMessage("");
 
-    if (response?.message === "User data submitted successfully") {
-      setMessage(`Awesome! You're among the top learners targeting ${formData.goal} at E-learning.ai 🚀`);
-      if (onSubmitSuccess) onSubmitSuccess();
-    } else {
-      setMessage("Something went wrong. Please try again.");
+    const payload = { ...formData, user_id: userId };
+
+    try {
+      const response = await submitUserData(payload);
+
+      if (response?.message === "User data submitted successfully") {
+        setMessage(`Awesome! You're among the top learners targeting ${formData.goal} at E-learning.ai 🚀`);
+        if (onSubmitSuccess) onSubmitSuccess();
+      } else {
+        throw new Error("Unexpected response");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong while submitting. Please check your network or try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,7 +80,7 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
         {/* Header */}
         <div
           className="mb-10 text-center cursor-pointer"
-          onClick={() => window.location.replace("/")}
+          onClick={onBackHome}
         >
           <h1 className="text-4xl font-extrabold tracking-wide text-indigo-400 hover:text-indigo-300 transition">
             E-learning.ai
@@ -160,9 +175,12 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
 
           <button
             type="submit"
-            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold text-lg transition"
+            disabled={loading}
+            className={`w-full py-4 rounded-lg font-semibold text-lg transition ${
+              loading ? "bg-gray-600 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+            }`}
           >
-            Submit and Start My Journey
+            {loading ? "Submitting..." : "Submit and Start My Journey"}
           </button>
         </form>
 
@@ -170,6 +188,20 @@ const UserForm = ({ userId, onSubmitSuccess }) => {
           <p className="mt-6 text-center text-indigo-400 font-medium text-lg animate-fade-in">
             {message}
           </p>
+        )}
+
+        {error && (
+          <div className="mt-6 text-center text-red-400 font-medium text-lg animate-fade-in">
+            {error}
+            <div className="mt-4">
+              <button
+                onClick={onBackHome}
+                className="text-sm text-blue-400 underline hover:text-blue-300 transition"
+              >
+                Go back to homepage
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
