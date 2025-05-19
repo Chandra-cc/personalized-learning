@@ -4,7 +4,6 @@ import {
   FaCheckCircle,
   FaBook,
   FaClock,
-  FaSignOutAlt,
   FaUserCircle,
   FaChevronDown,
 } from "react-icons/fa";
@@ -14,24 +13,23 @@ const UserDetailsModal = ({ isOpen, onClose, userData }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg p-8 max-w-md w-full shadow-lg"
+        className="bg-[#1f2937] text-white rounded-xl p-8 max-w-md w-full shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold mb-4">User Details</h2>
-        <div className="space-y-3 text-gray-700">
+        <div className="space-y-3">
           <p><strong>Email:</strong> {userData.email}</p>
           <p><strong>Goal:</strong> {userData.goal || "N/A"}</p>
           <p><strong>Age:</strong> {userData.age || "N/A"}</p>
           <p><strong>Education:</strong> {userData.education || "N/A"}</p>
-          {/* Add any other signup info fields you have */}
         </div>
         <button
           onClick={onClose}
-          className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="mt-6 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white w-full"
         >
           Close
         </button>
@@ -65,19 +63,13 @@ const Dashboard = ({ userId, onLogout }) => {
   }, [userId]);
 
   useEffect(() => {
-    // Close dropdown on outside click
-    function handleClickOutside(event) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleComplete = async (index) => {
@@ -98,8 +90,7 @@ const Dashboard = ({ userId, onLogout }) => {
     if (onLogout) onLogout();
   };
 
-  const toggleDropdown = () => setDropdownOpen((open) => !open);
-
+  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const openUserDetails = () => {
     setModalOpen(true);
     setDropdownOpen(false);
@@ -107,15 +98,15 @@ const Dashboard = ({ userId, onLogout }) => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-100 text-gray-700 text-xl font-semibold">
-        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-300 h-24 w-24"></div>
+      <div className="flex justify-center items-center h-screen bg-gray-900 text-white text-xl font-semibold">
+        <div className="loader border-4 border-blue-500 border-t-transparent rounded-full w-12 h-12 animate-spin"></div>
         <span className="ml-6">Loading dashboard...</span>
       </div>
     );
 
   if (!userData)
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-100 text-red-600 text-xl font-semibold">
+      <div className="flex justify-center items-center h-screen bg-gray-900 text-red-500 text-xl font-semibold">
         Failed to load data.
       </div>
     );
@@ -125,65 +116,60 @@ const Dashboard = ({ userId, onLogout }) => {
   const progressPercent = steps.length ? (completedCount / steps.length) * 100 : 0;
 
   return (
-    <div className="flex h-screen w-full bg-gray-50 text-gray-800 font-sans">
+    <div className="flex h-screen w-full bg-gray-900 text-white font-sans">
       {/* Sidebar */}
-      <aside className="w-66 bg-white border-r border-gray-200 flex flex-col justify-between shadow-lg">
+      <aside className="w-72 bg-gray-800 border-r border-gray-700 flex flex-col justify-between">
         <div>
-          <div className="px-8 py-6 border-b border-gray-200 flex items-center gap-3">
-            <FaBook className="text-blue-600 text-3xl" />
-            <h1 className="text-2xl font-extrabold text-gray-900">E-Learning.AI</h1>
+          <div className="px-8 py-6 border-b border-gray-700 flex items-center gap-3">
+            <FaBook className="text-blue-500 text-3xl" />
+            <h1 className="text-2xl font-bold text-white">E-Learning.AI</h1>
           </div>
-
-          <nav className="px-8 py-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Progress</p>
-              <span className="text-sm font-semibold text-gray-700">{completedCount} / {steps.length}</span>
+          <nav className="px-8 py-6 space-y-6">
+            <div className="flex justify-between items-center">
+              <p className="uppercase text-sm text-gray-400 font-semibold">Progress</p>
+              <span className="text-sm text-white font-medium">{completedCount}/{steps.length}</span>
             </div>
-
-            <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+            <div className="relative w-full h-3 bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="absolute left-0 top-0 h-4 bg-blue-600 transition-all duration-700 rounded-full"
+                className="absolute left-0 top-0 h-3 bg-blue-500 rounded-full transition-all duration-700"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </nav>
         </div>
-
-        <footer className="px-8 py-6 border-t border-gray-200 text-gray-500 text-xs text-center select-none">
+        <footer className="px-8 py-6 text-xs text-center text-gray-500 border-t border-gray-700 select-none">
           &copy; 2025 E-Learning.AI
         </footer>
       </aside>
 
-      {/* Main Content */}
+      {/* Main content */}
       <div className="flex flex-col flex-1">
         {/* Header */}
-        <header className="flex justify-between items-center px-10 py-5 border-b border-gray-200 bg-white shadow-sm relative">
-          <h2 className="text-3xl font-semibold text-gray-900">Dashboard</h2>
+        <header className="flex justify-between items-center px-10 py-5 border-b border-gray-700 bg-gray-800 relative">
+          <h2 className="text-3xl font-semibold">Dashboard</h2>
           <div
             ref={dropdownRef}
-            className="relative flex items-center gap-3 cursor-pointer select-none"
+            className="relative flex items-center gap-3 cursor-pointer"
             onClick={toggleDropdown}
           >
-            <FaUserCircle className="text-3xl text-gray-600" />
-            <span className="font-medium text-gray-700">{userData.email}</span>
+            <FaUserCircle className="text-3xl text-white" />
+            <span className="font-medium">{userData.email}</span>
             <FaChevronDown
-              className={`text-gray-500 transition-transform duration-200 ${
+              className={`transition-transform duration-200 ${
                 dropdownOpen ? "rotate-180" : "rotate-0"
               }`}
             />
-
-            {/* Dropdown Menu */}
             {dropdownOpen && (
-              <div className="absolute right-0 mt-12 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+              <div className="absolute right-0 top-12 w-48 bg-gray-800 border border-gray-700 rounded shadow-lg z-50">
                 <button
                   onClick={openUserDetails}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-100 text-gray-700 font-semibold"
+                  className="block w-full text-left px-4 py-3 text-white hover:bg-gray-700"
                 >
                   View Details
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-100 text-red-600 font-semibold"
+                  className="block w-full text-left px-4 py-3 text-red-400 hover:bg-gray-700"
                 >
                   Logout
                 </button>
@@ -192,47 +178,47 @@ const Dashboard = ({ userId, onLogout }) => {
           </div>
         </header>
 
-        {/* Steps Content */}
-        <main className="flex-1 overflow-y-auto p-10 bg-gray-50">
-          <h3 className="text-4xl font-bold mb-8 flex items-center gap-3 text-gray-900">
-            <FaBook className="text-blue-600" /> Your Learning Path
+        {/* Steps */}
+        <main className="flex-1 overflow-y-auto p-10 bg-gray-900">
+          <h3 className="text-4xl font-bold mb-10 flex items-center gap-3">
+            <FaBook className="text-blue-500" /> Your Learning Path
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {steps.map((step, index) => {
               const isCompleted = progress[index];
               return (
                 <div
                   key={index}
-                  className={`bg-white p-6 rounded-xl shadow-md transition-transform hover:scale-[1.03] border ${
+                  className={`p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300 border ${
                     isCompleted
-                      ? "border-green-400 bg-green-50"
-                      : "border-gray-200"
+                      ? "bg-green-800 border-green-600"
+                      : "bg-gray-800 border-gray-700"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className={`text-xl font-semibold ${isCompleted ? "text-green-700" : "text-gray-900"}`}>
+                    <h4 className={`text-xl font-semibold ${isCompleted ? "text-green-200" : "text-white"}`}>
                       Step {index + 1}: {step.title}
                     </h4>
-                    {isCompleted && <FaCheckCircle className="text-green-500 text-xl" />}
+                    {isCompleted && <FaCheckCircle className="text-green-400 text-xl" />}
                   </div>
-                  <p className="flex items-center gap-2 mb-5 text-gray-600 italic">
+                  <p className="flex items-center gap-2 mb-4 text-gray-300 italic">
                     <FaClock /> {step.duration}
                   </p>
                   <a
                     href={step.resource}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block mb-6 text-blue-600 hover:text-blue-800 font-semibold underline"
+                    className="block mb-6 text-blue-400 hover:text-blue-300 underline"
                   >
                     Visit Resource
                   </a>
                   <button
                     disabled={isCompleted || updatingStep === index}
                     onClick={() => handleComplete(index)}
-                    className={`w-full py-3 rounded-lg font-semibold text-white transition ${
+                    className={`w-full py-2 rounded-lg font-semibold text-white transition ${
                       isCompleted
-                        ? "bg-green-500 cursor-default"
+                        ? "bg-green-600 cursor-default"
                         : "bg-blue-600 hover:bg-blue-700"
                     }`}
                   >
