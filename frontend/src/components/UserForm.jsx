@@ -1,61 +1,8 @@
-import React, { useState, useRef, useEffect, memo, useCallback } from "react";
+import React, { useState, memo } from "react";
 import PropTypes from "prop-types";
-import { submitUserData } from "../api/api";
-import { FaGraduationCap, FaUserAlt, FaChartLine, FaArrowLeft, FaBriefcase, FaClock, FaLightbulb } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import "../styles/animations.css";
 import axios from 'axios';
-
-const suggestions = {
-  education: ["High School", "Bachelor's Degree", "Master's Degree", "PhD", "Self-Taught", "Bootcamp"],
-  goal: ["Data Scientist", "Software Engineer", "AI Researcher", "Product Manager", "UX Designer", "Entrepreneur"],
-};
-
-// Memoized Input Component
-const FormInput = memo(({ icon: Icon, label, ...props }) => (
-  <div className="relative">
-    <label className="text-sm text-gray-300 mb-1 block">{label}</label>
-    <div className="relative">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-        <Icon />
-      </div>
-      <input
-        {...props}
-        className="w-full pl-12 pr-4 py-4 bg-gray-900 rounded-xl text-gray-300 
-                   border border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 
-                   focus:border-transparent placeholder-gray-500 transition-all duration-300
-                   shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]
-                   hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.1)]"
-      />
-    </div>
-  </div>
-));
-
-FormInput.displayName = 'FormInput';
-
-// Memoized Suggestions List
-const SuggestionsList = memo(({ show, options, filter, onSelect }) => {
-  if (!show) return null;
-
-  return (
-    <ul className="absolute z-20 w-full mt-1 rounded-xl shadow-xl border border-gray-900 
-                   bg-gray-900 overflow-hidden">
-      {options
-        .filter((option) => option.toLowerCase().includes(filter.toLowerCase()))
-        .map((option, idx) => (
-          <li
-            key={idx}
-            className="px-4 py-3 hover:bg-gray-800 cursor-pointer transition-colors duration-200
-                       text-gray-300 hover:text-gray-200 border-b border-gray-800 last:border-0"
-            onClick={() => onSelect(option)}
-          >
-            {option}
-          </li>
-        ))}
-    </ul>
-  );
-});
-
-SuggestionsList.displayName = 'SuggestionsList';
 
 const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -107,24 +54,6 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [recommendations, setRecommendations] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState({ education: false, goal: false });
-
-  const educationRef = useRef(null);
-  const goalRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (educationRef.current && !educationRef.current.contains(event.target)) {
-        setShowSuggestions((s) => ({ ...s, education: false }));
-      }
-      if (goalRef.current && !goalRef.current.contains(event.target)) {
-        setShowSuggestions((s) => ({ ...s, goal: false }));
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -139,15 +68,6 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
       ...prev,
       [name]: value.split(',').map(item => item.trim())
     }));
-  };
-
-  const fetchRecommendations = async (userId) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/recommendations/${userId}`);
-      setRecommendations(response.data.recommendations);
-    } catch (err) {
-      console.error('Error fetching recommendations:', err);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -176,25 +96,12 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
       });
 
       setMessage(response.data.message || `Welcome aboard! Your personalized learning journey as a ${formData.goal} begins now 🚀`);
-      
-      // Fetch recommendations after successful submission
-      await fetchRecommendations(userId);
-      
       if (onSubmitSuccess) onSubmitSuccess();
     } catch (err) {
       console.error('Error submitting form:', err);
       setError(err.message || "Connection error. Please check your network and try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Prevent unnecessary API calls when changing steps
-  const handleStepChange = (direction) => {
-    if (direction === 'next' && currentStep < 4) {
-      setCurrentStep(prev => prev + 1);
-    } else if (direction === 'prev' && currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
     }
   };
 
@@ -421,7 +328,7 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
               {currentStep > 1 && (
                 <button
                   type="button"
-                  onClick={() => handleStepChange('prev')}
+                  onClick={() => setCurrentStep(prev => prev - 1)}
                   className="px-6 py-3 bg-gray-800 text-gray-300 rounded-xl hover:bg-gray-700 transition-colors"
                 >
                   Previous
@@ -430,7 +337,7 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
               {currentStep < 4 ? (
                 <button
                   type="button"
-                  onClick={() => handleStepChange('next')}
+                  onClick={() => setCurrentStep(prev => prev + 1)}
                   className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-colors ml-auto"
                 >
                   Next
@@ -439,7 +346,8 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition-colors ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleSubmit}
+                  className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition-colors ml-auto"
                 >
                   {loading ? "Creating Your Journey..." : "Start Learning"}
                 </button>
@@ -453,30 +361,6 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
                           shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]">
             {message}
             </div>
-        )}
-
-        {recommendations.length > 0 && (
-          <div className="mt-6 space-y-4">
-            <h3 className="text-xl font-bold text-gray-300">Personalized Recommendations</h3>
-            <div className="space-y-4">
-              {recommendations.map((rec, index) => (
-                <div key={index} className="p-4 rounded-xl bg-gray-900 border border-gray-800 
-                                        shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]">
-                  <h4 className="font-bold text-gray-300">{rec.title}</h4>
-                  <p className="text-gray-400 mt-2">{rec.description}</p>
-                  {rec.resource_url && (
-                    <a href={rec.resource_url} 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       className="text-blue-400 hover:text-blue-300 mt-2 inline-block">
-                      View Resource →
-                    </a>
-                  )}
-                  <p className="text-sm text-gray-500 mt-2">{rec.reason}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
 
         {error && (
