@@ -381,6 +381,8 @@ const Dashboard = ({ userId, onLogout }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [insights, setInsights] = useState(null);
   const [analytics, setAnalytics] = useState({
     overall_stats: {
       current_streak: 0,
@@ -391,20 +393,35 @@ const Dashboard = ({ userId, onLogout }) => {
     daily_analytics: []
   });
 
-  // Fetch user data and analytics
+  // Fetch user data, analytics, and recommendations
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log('Fetching user data and analytics...');
-        const [userRes, analyticsRes] = await Promise.all([
+        const [userRes, analyticsRes, recommendationsRes, insightsRes] = await Promise.all([
           axios.get(`http://localhost:5000/user/${userId}`),
-          axios.get(`http://localhost:5000/analytics/${userId}`)
+          axios.get(`http://localhost:5000/analytics/${userId}`).catch(err => {
+            console.warn('Failed to fetch analytics:', err);
+            return { data: null };
+          }),
+          axios.get(`http://localhost:5000/recommendations/${userId}`).catch(err => {
+            console.warn('Failed to fetch recommendations:', err);
+            return { data: { recommendations: [] } };
+          }),
+          axios.get(`http://localhost:5000/insights/${userId}`).catch(err => {
+            console.warn('Failed to fetch insights:', err);
+            return { data: null };
+          })
         ]);
         
         console.log('User API Response:', userRes.data);
         console.log('Analytics API Response:', analyticsRes.data);
+        console.log('Recommendations API Response:', recommendationsRes.data);
+        console.log('Insights API Response:', insightsRes.data);
         
         setUserData(userRes.data);
+        setRecommendations(recommendationsRes.data.recommendations || []);
+        setInsights(insightsRes.data);
         
         // Initialize progress state from API response
         const progressData = userRes.data.progress || {};
@@ -425,7 +442,7 @@ const Dashboard = ({ userId, onLogout }) => {
         console.log('Setting merged progress:', mergedProgress);
         setProgress(mergedProgress);
         
-        // Set analytics
+        // Set analytics with default values if null
         if (analyticsRes.data) {
           setAnalytics(prev => ({
             ...prev,
@@ -438,6 +455,11 @@ const Dashboard = ({ userId, onLogout }) => {
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
+        console.error("Error details:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
       } finally {
         setLoading(false);
       }
@@ -445,7 +467,7 @@ const Dashboard = ({ userId, onLogout }) => {
     fetchData();
   }, [userId]);
 
-  // Memoized handlers
+  // Refresh recommendations after completing a step
   const handleComplete = useCallback(async (index, progressData) => {
     console.log('Handling step completion:', { index, progressData });
     setUpdatingStep(index);
@@ -482,6 +504,16 @@ const Dashboard = ({ userId, onLogout }) => {
             ...response.data.analytics
           }
         }));
+      }
+
+      // Refresh recommendations after completing a step
+      try {
+        console.log('Fetching updated recommendations...');
+        const recommendationsRes = await axios.get(`http://localhost:5000/recommendations/${userId}`);
+        console.log('New recommendations:', recommendationsRes.data);
+        setRecommendations(recommendationsRes.data.recommendations || []);
+      } catch (err) {
+        console.error('Failed to fetch updated recommendations:', err);
       }
 
       // Refresh user data to ensure sync
@@ -531,13 +563,34 @@ const Dashboard = ({ userId, onLogout }) => {
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 to-black">
         <div className="p-6 bg-red-500/10 rounded-xl border border-red-500/20 text-red-400">
           <p className="text-xl font-medium">Failed to load your dashboard</p>
-          <p className="text-sm mt-2">Please try refreshing the page</p>
+          <p className="text-sm mt-2">Please check your connection and try refreshing the page</p>
+          <div className="mt-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  const steps = JSON.parse(userData.learning_path || "[]");
+  // Safely parse learning_path
+  let steps = [];
+  try {
+    steps = Array.isArray(userData.learning_path) 
+      ? userData.learning_path 
+      : (typeof userData.learning_path === 'string' 
+          ? JSON.parse(userData.learning_path || "[]") 
+          : []);
+  } catch (error) {
+    console.error("Error parsing learning path:", error);
+    console.log("Raw learning_path:", userData.learning_path);
+    steps = [];
+  }
+
   const completedCount = Object.values(progress).filter(Boolean).length;
   const progressPercent = steps.length ? (completedCount / steps.length) * 100 : 0;
 
@@ -658,6 +711,35 @@ const Dashboard = ({ userId, onLogout }) => {
             )}
           </div>
         </footer>
+
+        {/* Learning Insights */}
+        {insights && (
+          <div className="px-8 py-6 space-y-4 border-t border-gray-700">
+            <h3 className="font-medium text-gray-100">Learning Insights</h3>
+            <div className="space-y-4">
+              {insights.top_performing_skills?.length > 0 && (
+                <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+                  <p className="text-sm text-gray-300 mb-2">Top Skills</p>
+                  <div className="space-y-2">
+                    {insights.top_performing_skills.map(([skill, score], index) => (
+                      <div key={index} className="flex justify-between items-center">
+                        <span className="text-gray-200">{skill}</span>
+                        <span className="text-gray-400">{Math.round(score)}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+                <p className="text-sm text-gray-300 mb-2">Learning Velocity</p>
+                <p className="font-medium text-gray-100">
+                  {Math.round(insights.learning_velocity || 0)} steps/week
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* Main content */}
@@ -682,25 +764,94 @@ const Dashboard = ({ userId, onLogout }) => {
 
         {/* Learning Steps */}
         <div className="flex-1 overflow-y-auto p-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {steps.map((step, index) => {
-              const stepProgress = progress[index] || {};
-              const isCompleted = stepProgress === true || stepProgress.completed === true;
-              
-              console.log(`Step ${index} progress:`, { stepProgress, isCompleted });
-              
-              return (
-                <LearningStepCard
-                  key={index}
-                  step={step}
-                  index={index}
-                  isCompleted={isCompleted}
-                  updatingStep={updatingStep}
-                  onComplete={handleComplete}
-                  analytics={typeof stepProgress === 'object' ? stepProgress : null}
-                />
-              );
-            })}
+          {/* Recommendations Section */}
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">Recommended Next Steps</h2>
+            {recommendations.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {recommendations.map((rec, index) => (
+                  <div
+                    key={index}
+                    className="p-6 bg-gray-900 rounded-2xl border border-gray-700 
+                              shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
+                              hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
+                              transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-gray-800 rounded-xl">
+                        {rec.type === "current_path" ? (
+                          <FaBook className="text-xl text-gray-200" />
+                        ) : (
+                          <FaChartLine className="text-xl text-gray-200" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-100">
+                          {rec.type === "current_path" ? rec.step.title : rec.path_name}
+                        </h3>
+                        <p className="text-sm text-gray-400">{rec.reason}</p>
+                      </div>
+                    </div>
+                    {rec.type === "current_path" ? (
+                      <div>
+                        <p className="text-gray-300 mb-3">{rec.step.description}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <FaClock />
+                          <span>{rec.step.duration}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-gray-300 mb-3">Explore this new learning path based on your interests and performance.</p>
+                        {rec.first_step && (
+                          <div className="mt-2 p-3 bg-gray-800 rounded-lg">
+                            <p className="text-sm font-medium text-gray-200">First Step:</p>
+                            <p className="text-sm text-gray-400">{rec.first_step.title}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 bg-gray-900 rounded-2xl border border-gray-700 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="p-3 bg-gray-800 rounded-xl">
+                    <FaBook className="text-3xl text-gray-200" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-medium text-gray-100">No Recommendations Yet</h3>
+                    <p className="text-gray-400 mt-2">
+                      Complete some steps in your current learning path to get personalized recommendations.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Current Learning Path */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">Current Learning Path</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {steps.map((step, index) => {
+                const stepProgress = progress[index] || {};
+                const isCompleted = stepProgress === true || stepProgress.completed === true;
+                
+                return (
+                  <LearningStepCard
+                    key={index}
+                    step={step}
+                    index={index}
+                    isCompleted={isCompleted}
+                    updatingStep={updatingStep}
+                    onComplete={handleComplete}
+                    analytics={typeof stepProgress === 'object' ? stepProgress : null}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
       </main>

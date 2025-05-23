@@ -135,81 +135,133 @@ def submit_user_data():
 
 @main.route('/user/<int:user_id>', methods=['GET'])
 def get_user_data(user_id):
-    print(f"\n=== Getting user data for user {user_id} ===")
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"message": "User not found"}), 404
-
-    print(f"Raw user progress: {user.progress}")
-    
-    # Get user preferences
-    preferences = UserPreferences.query.filter_by(user_id=user_id).first()
-    
-    # Get analytics
-    analytics = LearningAnalytics.query.filter_by(user_id=user_id).order_by(LearningAnalytics.date.desc()).first()
-    
-    # Get detailed progress
-    step_progress_entries = StepProgress.query.filter_by(user_id=user_id).all()
-    print(f"Found {len(step_progress_entries)} step progress entries")
-    
-    # Initialize progress from the database
     try:
-        progress = json.loads(user.progress or "{}")
-    except json.JSONDecodeError:
-        print(f"Error decoding user progress: {user.progress}")
-        progress = {}
+        print(f"\n=== Getting user data for user {user_id} ===")
+        user = User.query.get(user_id)
+        if not user:
+            print(f"User {user_id} not found")
+            return jsonify({"error": "User not found", "message": "Unable to find user with the provided ID"}), 404
 
-    # Build detailed progress from StepProgress entries
-    detailed_progress = {}
-    for sp in step_progress_entries:
-        if sp.completed_at:  # Only include completed steps
-            step_index = str(sp.step_index)
-            detailed_progress[step_index] = {
-                "completed": True,
-                "time_spent": sp.time_spent,
-                "resource_visits": sp.resource_visits,
-                "difficulty_rating": sp.difficulty_rating,
-                "comprehension_score": sp.comprehension_score,
-                "notes": sp.notes,
-                "completed_at": sp.completed_at.isoformat()
-            }
-            # Ensure the step is marked as completed in the progress field
-            progress[step_index] = True
-
-    # Update user's progress if it changed
-    progress_json = json.dumps(progress)
-    if user.progress != progress_json:
-        user.progress = progress_json
+        print(f"Raw user progress: {user.progress}")
+        
+        # Get user preferences
+        preferences = UserPreferences.query.filter_by(user_id=user_id).first()
+        print(f"User preferences found: {bool(preferences)}")
+        
+        # Get analytics
+        analytics = LearningAnalytics.query.filter_by(user_id=user_id).order_by(LearningAnalytics.date.desc()).first()
+        print(f"Analytics found: {bool(analytics)}")
+        
+        # Get detailed progress
+        step_progress_entries = StepProgress.query.filter_by(user_id=user_id).all()
+        print(f"Found {len(step_progress_entries)} step progress entries")
+        
+        # Initialize progress from the database
         try:
-            db.session.commit()
-            print("Updated user progress in database")
-        except Exception as e:
-            print(f"Error updating progress: {str(e)}")
-            db.session.rollback()
+            progress = json.loads(user.progress or "{}")
+        except json.JSONDecodeError as e:
+            print(f"Error decoding user progress: {user.progress}")
+            print(f"JSON decode error: {str(e)}")
+            progress = {}
 
-    response_data = {
-        "email": user.email,
-        "age": user.age,
-        "gender": user.gender,
-        "education": user.education,
-        "goal": user.goal,
-        "learning_path": user.learning_path,
-        "progress": progress,
-        "detailed_progress": detailed_progress,
-        "analytics": {
-            "total_time_spent": analytics.total_time_spent if analytics else 0,
-            "daily_streak": analytics.daily_streak if analytics else 0,
-            "focus_score": analytics.focus_score if analytics else 0
-        } if analytics else {},
-        "preferences": {
-            "learning_style": preferences.learning_style,
-            "difficulty_preference": preferences.difficulty_preference,
-            "daily_goal_minutes": preferences.daily_goal_minutes
-        } if preferences else {}
-    }
-    
-    print(f"Sending response: {json.dumps(response_data, indent=2)}")
-    return jsonify(response_data)
+        # Build detailed progress from StepProgress entries
+        detailed_progress = {}
+        for sp in step_progress_entries:
+            if sp.completed_at:  # Only include completed steps
+                step_index = str(sp.step_index)
+                detailed_progress[step_index] = {
+                    "completed": True,
+                    "time_spent": sp.time_spent,
+                    "resource_visits": sp.resource_visits,
+                    "difficulty_rating": sp.difficulty_rating,
+                    "comprehension_score": sp.comprehension_score,
+                    "notes": sp.notes,
+                    "completed_at": sp.completed_at.isoformat()
+                }
+                # Ensure the step is marked as completed in the progress field
+                progress[step_index] = True
+
+        # Update user's progress if it changed
+        progress_json = json.dumps(progress)
+        if user.progress != progress_json:
+            print("Updating user progress in database")
+            try:
+                user.progress = progress_json
+                db.session.commit()
+                print("Successfully updated user progress")
+            except Exception as e:
+                print(f"Error updating progress: {str(e)}")
+                db.session.rollback()
+
+        # Ensure learning_path is valid JSON
+        try:
+            if isinstance(user.learning_path, str):
+                learning_path = json.loads(user.learning_path or "[]")
+            elif isinstance(user.learning_path, (list, dict)):
+                learning_path = user.learning_path
+            else:
+                print(f"Invalid learning_path type: {type(user.learning_path)}")
+                learning_path = []
+                
+            # Validate learning_path structure
+            if not isinstance(learning_path, list):
+                print(f"Invalid learning_path structure: {learning_path}")
+                learning_path = []
+                
+            # Update learning_path in database if it was invalid
+            if not user.learning_path or user.learning_path == "null":
+                user.learning_path = json.dumps(learning_path)
+                db.session.commit()
+                
+        except json.JSONDecodeError as e:
+            print(f"Error decoding learning path: {user.learning_path}")
+            print(f"JSON decode error: {str(e)}")
+            learning_path = []
+            # Update with valid empty array
+            user.learning_path = json.dumps(learning_path)
+            db.session.commit()
+
+        response_data = {
+            "email": user.email,
+            "age": user.age,
+            "gender": user.gender,
+            "education": user.education,
+            "goal": user.goal,
+            "learning_path": learning_path,  # This is now guaranteed to be a valid Python list
+            "progress": progress,
+            "detailed_progress": detailed_progress,
+            "analytics": {
+                "total_time_spent": analytics.total_time_spent if analytics else 0,
+                "daily_streak": analytics.daily_streak if analytics else 0,
+                "focus_score": analytics.focus_score if analytics else 0
+            } if analytics else {},
+            "preferences": {
+                "learning_style": preferences.learning_style if preferences else None,
+                "difficulty_preference": preferences.difficulty_preference if preferences else None,
+                "daily_goal_minutes": preferences.daily_goal_minutes if preferences else None
+            }
+        }
+        
+        # Validate response data can be serialized
+        try:
+            json.dumps(response_data)
+        except TypeError as e:
+            print(f"Error serializing response data: {str(e)}")
+            # Clean any non-serializable data
+            response_data["learning_path"] = []
+            
+        print(f"Sending response: {json.dumps(response_data, indent=2)}")
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Unexpected error in get_user_data: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "error": "Internal server error",
+            "message": "An unexpected error occurred while fetching user data",
+            "details": str(e)
+        }), 500
 
 # ----------------- LEARNING PATH / PROGRESS -----------------
 

@@ -15,9 +15,9 @@ function App() {
     try {
       const res = await axios.get(`http://localhost:5000/user/${id}`);
       const learningPath = res.data.learning_path;
-      const path = learningPath ? JSON.parse(learningPath) : [];
-
-      if (Array.isArray(path) && path.length > 0) {
+      
+      // Check if learning path exists and has items
+      if (Array.isArray(learningPath) && learningPath.length > 0) {
         setFormSubmitted(true);
         localStorage.setItem("form_submitted", "true");
       } else {
@@ -25,8 +25,16 @@ function App() {
         localStorage.removeItem("form_submitted");
       }
     } catch (error) {
-      setFormSubmitted(false);
-      localStorage.removeItem("form_submitted");
+      console.error("Error checking form submission:", error);
+      // Only clear form submitted if there's an actual error
+      if (error.response && error.response.status !== 200) {
+        setFormSubmitted(false);
+        localStorage.removeItem("form_submitted");
+      } else {
+        // If it's a network error, keep the existing state
+        const wasSubmitted = localStorage.getItem("form_submitted") === "true";
+        setFormSubmitted(wasSubmitted);
+      }
     } finally {
       setLoading(false);
     }
@@ -34,10 +42,19 @@ function App() {
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("user_id");
+    const wasFormSubmitted = localStorage.getItem("form_submitted") === "true";
+    
     if (storedUserId) {
       setUserId(storedUserId);
       setShowLanding(false);
-      checkFormSubmitted(storedUserId);
+      if (wasFormSubmitted) {
+        // If we know the form was submitted, set it immediately
+        setFormSubmitted(true);
+        setLoading(false);
+      } else {
+        // Only check with the server if we're not sure
+        checkFormSubmitted(storedUserId);
+      }
     } else {
       setLoading(false);
     }
