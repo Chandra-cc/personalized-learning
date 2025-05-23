@@ -1,3 +1,11 @@
 flask
 flask_sqlalchemy
 flask_cors
+transformers>=4.30.0
+torch>=2.0.0
+accelerate>=0.20.0
+sentencepiece>=0.1.99
+numpy>=1.21.0
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.12.2
+scikit-learn>=1.0.2

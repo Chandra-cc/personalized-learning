@@ -670,12 +670,42 @@ const Dashboard = ({ userId, onLogout }) => {
               </div>
             </div>
           </nav>
+
+          {/* Learning Insights */}
+          {insights && (
+            <div className="px-8 py-6 space-y-4 border-t border-gray-700">
+              <h3 className="font-medium text-gray-100">Learning Insights</h3>
+              <div className="space-y-4">
+                {insights.top_performing_skills?.length > 0 && (
+                  <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+                    <p className="text-sm text-gray-300 mb-2">Top Skills</p>
+                    <div className="space-y-2">
+                      {insights.top_performing_skills.map((skillData, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <span className="text-gray-200">{skillData.skill}</span>
+                          <span className="text-gray-400">{Math.round(skillData.score)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+                  <p className="text-sm text-gray-300 mb-2">Learning Velocity</p>
+                  <p className="font-medium text-gray-100">
+                    {Math.round(insights.learning_velocity || 0)} steps/week
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <footer className="px-8 py-6 border-t border-gray-700">
+        {/* Profile Section - Moved to bottom */}
+        <div className="mt-auto border-t border-gray-700">
           <div
             ref={dropdownRef}
-            className="relative flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-gray-800 transition-colors"
+            className="relative flex items-center gap-3 cursor-pointer p-6 hover:bg-gray-800 transition-colors"
             onClick={toggleDropdown}
           >
             <div className="p-2 bg-gray-800 rounded-xl">
@@ -710,36 +740,7 @@ const Dashboard = ({ userId, onLogout }) => {
               </div>
             )}
           </div>
-        </footer>
-
-        {/* Learning Insights */}
-        {insights && (
-          <div className="px-8 py-6 space-y-4 border-t border-gray-700">
-            <h3 className="font-medium text-gray-100">Learning Insights</h3>
-            <div className="space-y-4">
-              {insights.top_performing_skills?.length > 0 && (
-                <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-                  <p className="text-sm text-gray-300 mb-2">Top Skills</p>
-                  <div className="space-y-2">
-                    {insights.top_performing_skills.map(([skill, score], index) => (
-                      <div key={index} className="flex justify-between items-center">
-                        <span className="text-gray-200">{skill}</span>
-                        <span className="text-gray-400">{Math.round(score)}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-                <p className="text-sm text-gray-300 mb-2">Learning Velocity</p>
-                <p className="font-medium text-gray-100">
-                  {Math.round(insights.learning_velocity || 0)} steps/week
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </aside>
 
       {/* Main content */}

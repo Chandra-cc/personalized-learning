@@ -1,4 +1,4 @@
-from .models import User, StepProgress, UserPreferences
+from .models import User, StepProgress, UserPreferences, db
 from .learning_paths import learning_path_templates
 from sqlalchemy import func
 import json
@@ -156,41 +156,63 @@ def get_next_steps(user_id):
 
 def get_learning_insights(user_id):
     """Get insights about user's learning patterns and progress."""
-    # Get user's completed steps
-    completed_steps = StepProgress.query.filter_by(
-        user_id=user_id,
-        completed_at__isnot=None
-    ).all()
-    
-    if not completed_steps:
-        return {}
+    try:
+        # Get user's completed steps
+        completed_steps = StepProgress.query.filter_by(
+            user_id=user_id
+        ).filter(StepProgress.completed_at.isnot(None)).all()
         
-    # Calculate average completion time
-    avg_completion_time = func.avg(StepProgress.time_spent).scalar() or 0
-    
-    # Find best performing areas
-    performance_by_skill = Counter()
-    for step in completed_steps:
-        if step.comprehension_score:
-            user = User.query.get(user_id)
-            learning_path = json.loads(user.learning_path or "[]")
-            if step.step_index < len(learning_path):
+        if not completed_steps:
+            return {}
+            
+        # Calculate average completion time using proper SQLAlchemy query
+        avg_completion_time = db.session.query(
+            func.avg(StepProgress.time_spent)
+        ).filter_by(
+            user_id=user_id
+        ).filter(
+            StepProgress.completed_at.isnot(None)
+        ).scalar() or 0
+        
+        # Find best performing areas
+        performance_by_skill = Counter()
+        user = User.query.get(user_id)  # Get user once outside the loop
+        learning_path = json.loads(user.learning_path or "[]") if user else []
+        
+        for step in completed_steps:
+            if step.comprehension_score and step.step_index < len(learning_path):
                 step_details = learning_path[step.step_index]
                 for skill in step_details.get('skills_gained', []):
                     performance_by_skill[skill] += step.comprehension_score
-                    
-    # Get top performing skills
-    top_skills = performance_by_skill.most_common(3)
-    
-    # Calculate learning velocity (steps completed per week)
-    first_step = min(completed_steps, key=lambda x: x.started_at)
-    last_step = max(completed_steps, key=lambda x: x.completed_at)
-    weeks_spent = (last_step.completed_at - first_step.started_at).days / 7
-    velocity = len(completed_steps) / weeks_spent if weeks_spent > 0 else 0
-    
-    return {
-        "avg_completion_time": avg_completion_time,
-        "top_performing_skills": top_skills,
-        "learning_velocity": velocity,
-        "total_steps_completed": len(completed_steps)
-    } 
+                        
+        # Get top performing skills
+        top_skills = performance_by_skill.most_common(3)
+        
+        # Calculate learning velocity (steps completed per week)
+        if len(completed_steps) > 0:
+            first_step = min(completed_steps, key=lambda x: x.started_at)
+            last_step = max(completed_steps, key=lambda x: x.completed_at)
+            if first_step and last_step and first_step.started_at and last_step.completed_at:
+                weeks_spent = (last_step.completed_at - first_step.started_at).days / 7
+                velocity = len(completed_steps) / weeks_spent if weeks_spent > 0 else 0
+            else:
+                velocity = 0
+        else:
+            velocity = 0
+        
+        return {
+            "avg_completion_time": round(float(avg_completion_time), 2),
+            "top_performing_skills": [
+                {"skill": skill, "score": round(float(score), 2)} 
+                for skill, score in top_skills
+            ],
+            "learning_velocity": round(float(velocity), 2),
+            "total_steps_completed": len(completed_steps)
+        }
+        
+    except Exception as e:
+        print(f"Error in get_learning_insights: {str(e)}")
+        return {
+            "error": "Failed to generate learning insights",
+            "message": str(e)
+        } 
