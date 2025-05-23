@@ -127,10 +127,10 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
         {/* Header */}
         <div className="mb-12 text-center relative">
           <button
-            onClick={onBackHome}
+          onClick={onBackHome}
             className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-xl hover:bg-gray-900 
                        transition-colors duration-200 group"
-          >
+        >
             <FaArrowLeft className="text-gray-400 group-hover:text-gray-300 transition-colors duration-200" />
           </button>
           
@@ -143,51 +143,51 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
         <div className="bg-gray-900 rounded-2xl border border-gray-900 p-8 
                       shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]
                       hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.1)]">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
                 icon={FaUserAlt}
                 label="Age"
-                type="number"
-                name="age"
+            type="number"
+            name="age"
                 placeholder="Your age"
-                value={formData.age}
-                onChange={handleChange}
-                required
-              />
+            value={formData.age}
+            onChange={handleChange}
+            required
+          />
 
               <div className="relative">
                 <label className="text-sm text-gray-300 mb-1 block">Gender</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  required
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            required
                   className="w-full px-4 py-4 bg-gray-900 rounded-xl text-gray-300 border border-gray-900
                            focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent
                            transition-all duration-300 appearance-none"
-                >
+          >
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Non-binary">Non-binary</option>
                   <option value="Prefer not to say">Prefer not to say</option>
-                </select>
+          </select>
               </div>
             </div>
 
             <div className="space-y-6">
-              <div className="relative" ref={educationRef}>
+          <div className="relative" ref={educationRef}>
                 <FormInput
                   icon={FaGraduationCap}
                   label="Education"
-                  type="text"
-                  name="education"
+              type="text"
+              name="education"
                   placeholder="Your educational background"
-                  value={formData.education}
-                  onChange={handleChange}
-                  required
-                  autoComplete="off"
+              value={formData.education}
+              onChange={handleChange}
+              required
+              autoComplete="off"
                 />
                 <SuggestionsList
                   show={showSuggestions.education}
@@ -195,19 +195,19 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
                   filter={formData.education}
                   onSelect={(value) => handleSuggestionClick("education", value)}
                 />
-              </div>
+          </div>
 
-              <div className="relative" ref={goalRef}>
+          <div className="relative" ref={goalRef}>
                 <FormInput
                   icon={FaChartLine}
                   label="Career Goal"
-                  type="text"
-                  name="goal"
+              type="text"
+              name="goal"
                   placeholder="Your career aspiration"
-                  value={formData.goal}
-                  onChange={handleChange}
-                  required
-                  autoComplete="off"
+              value={formData.goal}
+              onChange={handleChange}
+              required
+              autoComplete="off"
                 />
                 <SuggestionsList
                   show={showSuggestions.goal}
@@ -216,30 +216,30 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
                   onSelect={(value) => handleSuggestionClick("goal", value)}
                 />
               </div>
-            </div>
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
+          <button
+            type="submit"
+            disabled={loading}
               className="w-full mt-8 py-4 rounded-xl font-medium text-lg transition-all duration-300 
                        transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100
                        bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 
                        disabled:from-gray-800 disabled:to-gray-800 disabled:cursor-not-allowed
                        text-gray-200 shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]"
-            >
+          >
               {loading ? "Creating Your Journey..." : "Begin My Learning Adventure"}
-            </button>
-          </form>
+          </button>
+        </form>
 
-          {message && (
+        {message && (
             <div className="mt-6 p-4 rounded-xl bg-gray-900 border border-gray-800 text-gray-300 
                           text-center animate-fade-in
                           shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]">
-              {message}
+            {message}
             </div>
-          )}
+        )}
 
-          {error && (
+        {error && (
             <div className="mt-6 p-4 rounded-xl bg-gray-900 border border-gray-800 text-gray-300 
                           text-center animate-fade-in
                           shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]">
@@ -252,7 +252,7 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
               </button>
             </div>
           )}
-        </div>
+          </div>
       </div>
     </div>
   );
