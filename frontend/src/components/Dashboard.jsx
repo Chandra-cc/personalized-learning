@@ -10,8 +10,9 @@ import {
   FaChartLine,
   FaCalendarAlt,
   FaBookmark,
-  FaMedal,
-  FaRegLightbulb,
+  FaChevronUp,
+  FaFire,
+  FaBrain,
 } from "react-icons/fa";
 
 // Memoized Modal Component
@@ -84,7 +85,42 @@ UserDetailsModal.propTypes = {
 };
 
 // Memoized Step Card Component
-const LearningStepCard = memo(({ step, index, isCompleted, updatingStep, onComplete }) => {
+const LearningStepCard = memo(({ step, index, isCompleted, updatingStep, onComplete, analytics }) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comprehension, setComprehension] = useState(0);
+  const [notes, setNotes] = useState("");
+  const [timeSpent, setTimeSpent] = useState(0);
+
+  useEffect(() => {
+    if (analytics) {
+      setRating(analytics.difficulty_rating || 0);
+      setComprehension(analytics.comprehension_score || 0);
+      setTimeSpent(analytics.time_spent || 0);
+    }
+  }, [analytics]);
+
+  const handleComplete = async () => {
+    await onComplete(index, {
+      difficulty_rating: rating,
+      comprehension_score: comprehension,
+      notes,
+      time_spent: timeSpent
+    });
+  };
+
+  // Ensure step has all required properties with defaults
+  const {
+    title = "",
+    duration = "",
+    description = "",
+    learning_objectives = [],
+    resources = {},
+    projects = [],
+    prerequisites = [],
+    skills_gained = []
+  } = step || {};
+
   return (
     <div
       className={`group relative p-6 rounded-2xl border transition-all duration-300 
@@ -98,16 +134,22 @@ const LearningStepCard = memo(({ step, index, isCompleted, updatingStep, onCompl
     >
       <div className="relative">
         <div className="flex items-start justify-between mb-4">
-          <div>
+          <div className="flex-1">
             <div className="flex items-center gap-2 text-sm text-gray-300 mb-2">
               <FaClock />
-              <span>{step.duration}</span>
+              <span>{duration}</span>
+              {prerequisites.length > 0 && (
+                <span className="ml-2 text-gray-400">
+                  Prerequisites: {prerequisites.join(", ")}
+                </span>
+              )}
             </div>
             <h3 className={`text-xl font-semibold mb-3 ${
               isCompleted ? "text-gray-100" : "text-gray-100"
             }`}>
-              {step.title}
+              {title}
             </h3>
+            <p className="text-gray-400 mb-4">{description}</p>
           </div>
           {isCompleted && (
             <div className="p-2 bg-gray-800 rounded-xl">
@@ -116,20 +158,184 @@ const LearningStepCard = memo(({ step, index, isCompleted, updatingStep, onCompl
           )}
         </div>
 
-        <a
-          href={step.resource}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-gray-100 hover:text-gray-300 
-                   transition-colors mb-6 group-hover:underline"
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          className="text-gray-300 hover:text-gray-100 mb-4 flex items-center gap-2"
         >
-          <FaBook className="text-sm" />
-          <span>Access Learning Material</span>
-        </a>
+          {showDetails ? <FaChevronUp /> : <FaChevronDown />}
+          {showDetails ? "Hide Details" : "Show Details"}
+        </button>
+
+        {showDetails && (
+          <div className="space-y-6 mb-6">
+            {/* Learning Objectives */}
+            {learning_objectives.length > 0 && (
+              <div>
+                <h4 className="text-lg font-semibold text-gray-200 mb-2">Learning Objectives</h4>
+                <ul className="list-disc list-inside space-y-1 text-gray-400">
+                  {learning_objectives.map((objective, i) => (
+                    <li key={i}>{objective}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Resources */}
+            {Object.keys(resources).length > 0 && (
+              <div>
+                <h4 className="text-lg font-semibold text-gray-200 mb-2">Learning Resources</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(resources).map(([type, url]) => (
+                    <a
+                      key={type}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-300 hover:text-gray-100 transition-colors"
+                    >
+                      <FaBook />
+                      <span className="capitalize">{type.replace('_', ' ')}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Projects */}
+            {projects.length > 0 && (
+              <div>
+                <h4 className="text-lg font-semibold text-gray-200 mb-2">Projects</h4>
+                {projects.map((project, i) => (
+                  <div key={i} className="bg-gray-800 p-4 rounded-xl">
+                    <h5 className="font-medium text-gray-200">{project.title}</h5>
+                    <p className="text-gray-400 text-sm mt-1">{project.description}</p>
+                    <span className="text-xs text-gray-500 mt-2 inline-block">
+                      Difficulty: {project.difficulty}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Skills */}
+            {skills_gained.length > 0 && (
+              <div>
+                <h4 className="text-lg font-semibold text-gray-200 mb-2">Skills You'll Gain</h4>
+                <div className="flex flex-wrap gap-2">
+                  {skills_gained.map((skill, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1 bg-gray-800 rounded-full text-sm text-gray-300"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Progress Tracking (if not completed) */}
+            {!isCompleted && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-gray-300 block mb-2">Difficulty Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        className={`text-2xl ${
+                          star <= rating ? 'text-yellow-500' : 'text-gray-600'
+                        }`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-gray-300 block mb-2">
+                    Comprehension Level: {comprehension}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={comprehension}
+                    onChange={(e) => setComprehension(parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-gray-300 block mb-2">Time Spent (minutes)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={timeSpent}
+                    onChange={(e) => setTimeSpent(parseInt(e.target.value))}
+                    className="bg-gray-800 text-gray-200 px-3 py-2 rounded-lg w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-gray-300 block mb-2">Notes</label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="bg-gray-800 text-gray-200 px-3 py-2 rounded-lg w-full h-24 resize-none"
+                    placeholder="Add your notes about this step..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Analytics (if completed) */}
+            {isCompleted && analytics && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-800 p-4 rounded-xl">
+                    <h5 className="text-gray-300 mb-1">Time Spent</h5>
+                    <p className="text-2xl font-semibold text-gray-100">
+                      {analytics.time_spent} min
+                    </p>
+                  </div>
+                  <div className="bg-gray-800 p-4 rounded-xl">
+                    <h5 className="text-gray-300 mb-1">Difficulty</h5>
+                    <p className="text-2xl font-semibold text-gray-100">
+                      {analytics.difficulty_rating}/5
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-gray-800 p-4 rounded-xl">
+                  <h5 className="text-gray-300 mb-1">Comprehension Score</h5>
+                  <div className="relative pt-1">
+                    <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-700">
+                      <div
+                        style={{ width: `${analytics.comprehension_score}%` }}
+                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gray-300"
+                      />
+                    </div>
+                    <span className="text-gray-400 text-sm mt-1">
+                      {analytics.comprehension_score}%
+                    </span>
+                  </div>
+                </div>
+                {analytics.notes && (
+                  <div className="bg-gray-800 p-4 rounded-xl">
+                    <h5 className="text-gray-300 mb-1">Notes</h5>
+                    <p className="text-gray-400">{analytics.notes}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <button
           disabled={isCompleted || updatingStep === index}
-          onClick={() => onComplete(index)}
+          onClick={handleComplete}
           className={`w-full py-3 rounded-xl font-medium transition-all duration-300 
                     transform hover:scale-[1.02] active:scale-[0.98] ${
                       isCompleted
@@ -159,6 +365,12 @@ LearningStepCard.propTypes = {
   isCompleted: PropTypes.bool.isRequired,
   updatingStep: PropTypes.number,
   onComplete: PropTypes.func.isRequired,
+  analytics: PropTypes.shape({
+    difficulty_rating: PropTypes.number,
+    comprehension_score: PropTypes.number,
+    time_spent: PropTypes.number,
+    notes: PropTypes.string,
+  }),
 };
 
 const Dashboard = ({ userId, onLogout }) => {
@@ -169,15 +381,113 @@ const Dashboard = ({ userId, onLogout }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [analytics, setAnalytics] = useState({
+    overall_stats: {
+      current_streak: 0,
+      total_time_spent: 0,
+      average_comprehension: 0,
+      total_steps_completed: 0
+    },
+    daily_analytics: []
+  });
+
+  // Fetch user data and analytics
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log('Fetching user data and analytics...');
+        const [userRes, analyticsRes] = await Promise.all([
+          axios.get(`http://localhost:5000/user/${userId}`),
+          axios.get(`http://localhost:5000/analytics/${userId}`)
+        ]);
+        
+        console.log('User API Response:', userRes.data);
+        console.log('Analytics API Response:', analyticsRes.data);
+        
+        setUserData(userRes.data);
+        
+        // Initialize progress state from API response
+        const progressData = userRes.data.progress || {};
+        const detailedProgress = userRes.data.detailed_progress || {};
+        
+        console.log('Progress from API:', progressData);
+        console.log('Detailed Progress from API:', detailedProgress);
+        
+        // Merge progress data
+        const mergedProgress = { ...progressData };
+        Object.entries(detailedProgress).forEach(([index, data]) => {
+          mergedProgress[index] = {
+            ...data,
+            completed: true
+          };
+        });
+        
+        console.log('Setting merged progress:', mergedProgress);
+        setProgress(mergedProgress);
+        
+        // Set analytics
+        if (analyticsRes.data) {
+          setAnalytics(prev => ({
+            ...prev,
+            ...analyticsRes.data,
+            overall_stats: {
+              ...prev.overall_stats,
+              ...(analyticsRes.data.overall_stats || {})
+            }
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [userId]);
 
   // Memoized handlers
-  const handleComplete = useCallback(async (index) => {
+  const handleComplete = useCallback(async (index, progressData) => {
+    console.log('Handling step completion:', { index, progressData });
     setUpdatingStep(index);
     try {
-      await axios.post(`http://localhost:5000/update-progress/${userId}`, {
+      console.log('Sending progress update:', { step_index: index, ...progressData });
+      
+      const response = await axios.post(`http://localhost:5000/update-progress/${userId}`, {
         step_index: index,
+        ...progressData
       });
-      setProgress((prev) => ({ ...prev, [index]: true }));
+      
+      console.log('Progress update API response:', response.data);
+      
+      // Update progress state with the response data
+      setProgress(prev => {
+        const newProgress = {
+          ...prev,
+          [index]: {
+            ...progressData,
+            completed: true,
+            completed_at: new Date().toISOString()
+          }
+        };
+        console.log('New progress state:', newProgress);
+        return newProgress;
+      });
+      
+      // Update analytics
+      if (response.data.analytics) {
+        setAnalytics(prev => ({
+          ...prev,
+          overall_stats: {
+            ...prev.overall_stats,
+            ...response.data.analytics
+          }
+        }));
+      }
+
+      // Refresh user data to ensure sync
+      const userRes = await axios.get(`http://localhost:5000/user/${userId}`);
+      setUserData(userRes.data);
+      
     } catch (err) {
       console.error("Failed to update progress:", err);
     } finally {
@@ -193,22 +503,6 @@ const Dashboard = ({ userId, onLogout }) => {
     setModalOpen(true);
     setDropdownOpen(false);
   }, []);
-
-  // Fetch user data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/user/${userId}`);
-        setUserData(res.data);
-        setProgress(JSON.parse(res.data.progress || "{}"));
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [userId]);
 
   // Handle click outside dropdown
   useEffect(() => {
@@ -284,27 +578,41 @@ const Dashboard = ({ userId, onLogout }) => {
               </div>
             </div>
 
-            {/* Quick Stats */}
+            {/* Analytics Overview */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-700 
-                            hover:bg-gray-700 transition-colors cursor-pointer">
+              <div className="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-700">
                 <div className="p-2 bg-gray-900 rounded-lg">
-                  <FaMedal className="text-gray-200" />
+                  <FaFire className="text-orange-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-300">Completed</p>
-                  <p className="font-medium text-gray-100">{completedCount} Lessons</p>
+                  <p className="text-sm text-gray-300">Current Streak</p>
+                  <p className="font-medium text-gray-100">
+                    {analytics.overall_stats.current_streak || 0} days
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-700 
-                            hover:bg-gray-700 transition-colors cursor-pointer">
+              <div className="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-700">
                 <div className="p-2 bg-gray-900 rounded-lg">
-                  <FaRegLightbulb className="text-gray-200" />
+                  <FaClock className="text-gray-200" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-300">Current Goal</p>
-                  <p className="font-medium text-gray-100">{userData.goal || "Set a goal"}</p>
+                  <p className="text-sm text-gray-300">Total Time</p>
+                  <p className="font-medium text-gray-100">
+                    {Math.round((analytics.overall_stats.total_time_spent || 0) / 60)} hours
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-700">
+                <div className="p-2 bg-gray-900 rounded-lg">
+                  <FaBrain className="text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-300">Avg. Comprehension</p>
+                  <p className="font-medium text-gray-100">
+                    {Math.round(analytics.overall_stats.average_comprehension || 0)}%
+                  </p>
                 </div>
               </div>
             </div>
@@ -375,16 +683,24 @@ const Dashboard = ({ userId, onLogout }) => {
         {/* Learning Steps */}
         <div className="flex-1 overflow-y-auto p-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {steps.map((step, index) => (
-              <LearningStepCard
-                key={index}
-                step={step}
-                index={index}
-                isCompleted={progress[index]}
-                updatingStep={updatingStep}
-                onComplete={handleComplete}
-              />
-            ))}
+            {steps.map((step, index) => {
+              const stepProgress = progress[index] || {};
+              const isCompleted = stepProgress === true || stepProgress.completed === true;
+              
+              console.log(`Step ${index} progress:`, { stepProgress, isCompleted });
+              
+              return (
+                <LearningStepCard
+                  key={index}
+                  step={step}
+                  index={index}
+                  isCompleted={isCompleted}
+                  updatingStep={updatingStep}
+                  onComplete={handleComplete}
+                  analytics={typeof stepProgress === 'object' ? stepProgress : null}
+                />
+              );
+            })}
           </div>
         </div>
       </main>
