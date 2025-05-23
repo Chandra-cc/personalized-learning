@@ -1,11 +1,60 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, memo, useCallback } from "react";
+import PropTypes from "prop-types";
 import { submitUserData } from "../api/api";
+import { FaGraduationCap, FaUserAlt, FaChartLine, FaArrowLeft } from "react-icons/fa";
 import "../styles/animations.css";
 
 const suggestions = {
   education: ["High School", "Bachelor's Degree", "Master's Degree", "PhD", "Self-Taught", "Bootcamp"],
   goal: ["Data Scientist", "Software Engineer", "AI Researcher", "Product Manager", "UX Designer", "Entrepreneur"],
 };
+
+// Memoized Input Component
+const FormInput = memo(({ icon: Icon, label, ...props }) => (
+  <div className="relative">
+    <label className="text-sm text-gray-300 mb-1 block">{label}</label>
+    <div className="relative">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+        <Icon />
+      </div>
+      <input
+        {...props}
+        className="w-full pl-12 pr-4 py-4 bg-gray-900 rounded-xl text-gray-300 
+                   border border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-800 
+                   focus:border-transparent placeholder-gray-500 transition-all duration-300
+                   shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]
+                   hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.1)]"
+      />
+    </div>
+  </div>
+));
+
+FormInput.displayName = 'FormInput';
+
+// Memoized Suggestions List
+const SuggestionsList = memo(({ show, options, filter, onSelect }) => {
+  if (!show) return null;
+
+  return (
+    <ul className="absolute z-20 w-full mt-1 rounded-xl shadow-xl border border-gray-900 
+                   bg-gray-900 overflow-hidden">
+      {options
+        .filter((option) => option.toLowerCase().includes(filter.toLowerCase()))
+        .map((option, idx) => (
+          <li
+            key={idx}
+            className="px-4 py-3 hover:bg-gray-800 cursor-pointer transition-colors duration-200
+                       text-gray-300 hover:text-gray-200 border-b border-gray-800 last:border-0"
+            onClick={() => onSelect(option)}
+          >
+            {option}
+          </li>
+        ))}
+    </ul>
+  );
+});
+
+SuggestionsList.displayName = 'SuggestionsList';
 
 const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
   const [formData, setFormData] = useState({
@@ -35,18 +84,18 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = useCallback((e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     if (e.target.name in showSuggestions) {
-      setShowSuggestions({ ...showSuggestions, [e.target.name]: true });
+      setShowSuggestions(prev => ({ ...prev, [e.target.name]: true }));
     }
-    setError(""); // Clear error on change
-  };
+    setError("");
+  }, [showSuggestions]);
 
-  const handleSuggestionClick = (field, value) => {
-    setFormData({ ...formData, [field]: value });
-    setShowSuggestions({ ...showSuggestions, [field]: false });
-  };
+  const handleSuggestionClick = useCallback((field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setShowSuggestions(prev => ({ ...prev, [field]: false }));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,158 +103,165 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
     setError("");
     setMessage("");
 
-    const payload = { ...formData, user_id: userId };
-
     try {
-      const response = await submitUserData(payload);
+      const response = await submitUserData({ ...formData, user_id: userId });
 
       if (response?.message === "User data submitted successfully") {
-        setMessage(`Awesome! You're among the top learners targeting ${formData.goal} at E-learning.ai 🚀`);
+        setMessage(`Welcome aboard! Your personalized learning journey as a ${formData.goal} begins now 🚀`);
         if (onSubmitSuccess) onSubmitSuccess();
       } else {
         throw new Error("Unexpected response");
       }
     } catch (err) {
       console.error(err);
-      setError("Something went wrong while submitting. Please check your network or try again.");
+      setError("Connection error. Please check your network and try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#1e1e1e] to-[#2b2b2b] text-white px-4 font-sans">
-      <div className="w-full max-w-2xl bg-gradient-to-br from-[#2d2d2d] to-[#3a3a3a] p-10 rounded-3xl shadow-2xl border border-gray-700 backdrop-blur-sm">
-
+    <div className="min-h-screen w-full flex items-center justify-center bg-black 
+                    text-gray-300 px-4 py-10 font-sans">
+      <div className="w-full max-w-2xl">
         {/* Header */}
-        <div
-          className="mb-10 text-center cursor-pointer"
-          onClick={onBackHome}
-        >
-          <h1 className="text-4xl font-extrabold tracking-wide text-indigo-400 hover:text-indigo-300 transition">
+        <div className="mb-12 text-center relative">
+          <button
+            onClick={onBackHome}
+            className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-xl hover:bg-gray-900 
+                       transition-colors duration-200 group"
+          >
+            <FaArrowLeft className="text-gray-400 group-hover:text-gray-300 transition-colors duration-200" />
+          </button>
+          
+          <h1 className="text-4xl font-bold text-gray-300">
             E-learning.ai
           </h1>
-          <p className="mt-2 text-lg text-gray-300">Let’s build your learning path</p>
+          <p className="mt-3 text-gray-400">Design your personalized learning experience</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <input
-            type="number"
-            name="age"
-            placeholder="How old are you?"
-            value={formData.age}
-            onChange={handleChange}
-            required
-            className="w-full p-4 bg-[#444] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+        <div className="bg-gray-900 rounded-2xl border border-gray-900 p-8 
+                      shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]
+                      hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.1)]">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormInput
+                icon={FaUserAlt}
+                label="Age"
+                type="number"
+                name="age"
+                placeholder="Your age"
+                value={formData.age}
+                onChange={handleChange}
+                required
+              />
 
-          <select
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            required
-            className="w-full p-4 bg-[#444] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="">Select your gender</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Non-binary</option>
-            <option>Prefer not to say</option>
-          </select>
+              <div className="relative">
+                <label className="text-sm text-gray-300 mb-1 block">Gender</label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-4 bg-gray-900 rounded-xl text-gray-300 border border-gray-900
+                           focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent
+                           transition-all duration-300 appearance-none"
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Non-binary">Non-binary</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
 
-          <div className="relative" ref={educationRef}>
-            <input
-              type="text"
-              name="education"
-              placeholder="What's your educational background?"
-              value={formData.education}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              className="w-full p-4 bg-[#444] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            {showSuggestions.education && (
-              <ul className="absolute z-20 bg-[#555] w-full mt-1 rounded-lg shadow-md border border-gray-600 max-h-40 overflow-y-auto">
-                {suggestions.education
-                  .filter((e) =>
-                    e.toLowerCase().includes(formData.education.toLowerCase())
-                  )
-                  .map((option, idx) => (
-                    <li
-                      key={idx}
-                      className="px-4 py-2 hover:bg-indigo-600 cursor-pointer transition"
-                      onClick={() => handleSuggestionClick("education", option)}
-                    >
-                      {option}
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </div>
+            <div className="space-y-6">
+              <div className="relative" ref={educationRef}>
+                <FormInput
+                  icon={FaGraduationCap}
+                  label="Education"
+                  type="text"
+                  name="education"
+                  placeholder="Your educational background"
+                  value={formData.education}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                />
+                <SuggestionsList
+                  show={showSuggestions.education}
+                  options={suggestions.education}
+                  filter={formData.education}
+                  onSelect={(value) => handleSuggestionClick("education", value)}
+                />
+              </div>
 
-          <div className="relative" ref={goalRef}>
-            <input
-              type="text"
-              name="goal"
-              placeholder="What's your career goal?"
-              value={formData.goal}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              className="w-full p-4 bg-[#444] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            {showSuggestions.goal && (
-              <ul className="absolute z-20 bg-[#555] w-full mt-1 rounded-lg shadow-md border border-gray-600 max-h-40 overflow-y-auto">
-                {suggestions.goal
-                  .filter((g) =>
-                    g.toLowerCase().includes(formData.goal.toLowerCase())
-                  )
-                  .map((option, idx) => (
-                    <li
-                      key={idx}
-                      className="px-4 py-2 hover:bg-indigo-600 cursor-pointer transition"
-                      onClick={() => handleSuggestionClick("goal", option)}
-                    >
-                      {option}
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </div>
+              <div className="relative" ref={goalRef}>
+                <FormInput
+                  icon={FaChartLine}
+                  label="Career Goal"
+                  type="text"
+                  name="goal"
+                  placeholder="Your career aspiration"
+                  value={formData.goal}
+                  onChange={handleChange}
+                  required
+                  autoComplete="off"
+                />
+                <SuggestionsList
+                  show={showSuggestions.goal}
+                  options={suggestions.goal}
+                  filter={formData.goal}
+                  onSelect={(value) => handleSuggestionClick("goal", value)}
+                />
+              </div>
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-4 rounded-lg font-semibold text-lg transition ${
-              loading ? "bg-gray-600 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
-          >
-            {loading ? "Submitting..." : "Submit and Start My Journey"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-8 py-4 rounded-xl font-medium text-lg transition-all duration-300 
+                       transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100
+                       bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 
+                       disabled:from-gray-800 disabled:to-gray-800 disabled:cursor-not-allowed
+                       text-gray-200 shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]"
+            >
+              {loading ? "Creating Your Journey..." : "Begin My Learning Adventure"}
+            </button>
+          </form>
 
-        {message && (
-          <p className="mt-6 text-center text-indigo-400 font-medium text-lg animate-fade-in">
-            {message}
-          </p>
-        )}
+          {message && (
+            <div className="mt-6 p-4 rounded-xl bg-gray-900 border border-gray-800 text-gray-300 
+                          text-center animate-fade-in
+                          shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]">
+              {message}
+            </div>
+          )}
 
-        {error && (
-          <div className="mt-6 text-center text-red-400 font-medium text-lg animate-fade-in">
-            {error}
-            <div className="mt-4">
+          {error && (
+            <div className="mt-6 p-4 rounded-xl bg-gray-900 border border-gray-800 text-gray-300 
+                          text-center animate-fade-in
+                          shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]">
+              <p>{error}</p>
               <button
                 onClick={onBackHome}
-                className="text-sm text-blue-400 underline hover:text-blue-300 transition"
+                className="mt-3 text-sm text-gray-300 hover:text-gray-500 transition-colors duration-200"
               >
-                Go back to homepage
+                Return to homepage
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default UserForm;
+UserForm.propTypes = {
+  userId: PropTypes.string.isRequired,
+  onSubmitSuccess: PropTypes.func.isRequired,
+  onBackHome: PropTypes.func.isRequired,
+};
+
+export default memo(UserForm);

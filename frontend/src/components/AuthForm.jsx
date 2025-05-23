@@ -26,7 +26,7 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
   };
 
   return (
-    <div className="relative w-screen h-screen flex">
+    <div className="relative w-screen h-screen flex bg-black">
       {/* Left Section - Video */}
       <div className="hidden lg:block lg:w-[60%] relative overflow-hidden">
         <video
@@ -35,44 +35,34 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
           muted
           playsInline
           className="absolute w-full h-full object-cover"
-          style={{ filter: 'brightness(0.7)' }}
         >
           <source
-            src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-digital-wave-background-97895-large.mp4"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             type="video/mp4"
           />
-          {/* Fallback for video */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900" />
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-black" />
         </video>
         
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/30 to-purple-900/30" />
-        
-        {/* Animated Particles Effect */}
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 10%)',
-          backgroundSize: '3vmin 3vmin'
-        }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 to-black/80" />
 
         {/* Brand Section */}
         <div className="absolute bottom-20 left-20 z-10 max-w-xl">
-          <h2 className="text-6xl font-bold text-white mb-6 leading-tight">
-            Transform Your Learning Journey
+          <h2 className="text-6xl font-bold text-gray-300 mb-6 leading-tight">
+            Begin Your Learning Adventure
           </h2>
-          <p className="text-xl text-white/80 leading-relaxed">
-            Discover personalized learning paths powered by artificial intelligence.
-            Your journey to knowledge starts here.
+          <p className="text-xl text-gray-400 leading-relaxed">
+            Join our community of learners and discover AI-powered personalized education paths designed just for you.
           </p>
         </div>
       </div>
 
       {/* Right Section - Form */}
-      <div className="w-full lg:w-[40%] h-full bg-gradient-to-br from-gray-900 to-black flex flex-col">
+      <div className="w-full lg:w-[40%] h-full bg-black flex flex-col">
         {/* Header */}
         <header 
-          className="px-10 py-8 flex items-center justify-between"
+          className="px-10 py-8 flex items-center justify-between border-b border-gray-900"
           onClick={() => onBackHome && onBackHome()}
-          title="Go to Home"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -81,9 +71,7 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
             }
           }}
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 
-                         bg-clip-text text-transparent hover:from-blue-300 hover:to-purple-400 
-                         transition-all duration-300 cursor-pointer">
+          <h1 className="text-4xl font-bold text-gray-300 hover:text-gray-500 transition cursor-pointer">
             E-learning.ai
           </h1>
         </header>
@@ -92,7 +80,7 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
         <div className="flex-1 flex items-center justify-center px-10 lg:px-20">
           <div className="w-full max-w-md space-y-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-2">
+              <h2 className="text-3xl font-bold text-gray-300 mb-2">
                 {mode === "login" ? "Welcome Back" : "Create Account"}
               </h2>
               <p className="text-gray-400">
@@ -112,9 +100,11 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
                     type="email"
                     name="email"
                     placeholder="Enter your email"
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800/50 text-white border border-gray-700
-                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                             placeholder-gray-500 transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-900 text-gray-300 border border-gray-900
+                             focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent
+                             placeholder-gray-500 transition-all duration-300
+                             shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]
+                             hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.1)]"
                     onChange={handleChange}
                     required
                     value={formData.email}
@@ -129,9 +119,11 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
                     type="password"
                     name="password"
                     placeholder="Enter your password"
-                    className="w-full px-4 py-3 rounded-lg bg-gray-800/50 text-white border border-gray-700
-                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                             placeholder-gray-500 transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-900 text-gray-300 border border-gray-900
+                             focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent
+                             placeholder-gray-500 transition-all duration-300
+                             shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]
+                             hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.1)]"
                     onChange={handleChange}
                     required
                     value={formData.password}
@@ -140,10 +132,10 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
               </div>
 
               <button 
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg
-                         hover:from-blue-600 hover:to-purple-700 transform hover:scale-[1.02] 
+                className="w-full bg-gradient-to-r from-gray-900 to-gray-800 text-gray-200 py-3 rounded-xl
+                         hover:from-gray-800 hover:to-gray-700 transform hover:scale-[1.02] 
                          active:scale-[0.98] transition-all duration-300 font-medium text-lg
-                         shadow-lg shadow-blue-500/25"
+                         shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]"
               >
                 {mode === "login" ? "Sign In" : "Create Account"}
               </button>
@@ -154,7 +146,7 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
                   <button
                     type="button"
                     onClick={() => setMode(mode === "login" ? "signup" : "login")}
-                    className="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-300"
+                    className="text-gray-300 hover:text-gray-500 font-medium transition-colors duration-300"
                   >
                     {mode === "login" ? "Sign Up" : "Sign In"}
                   </button>
@@ -164,7 +156,8 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
 
             {message && (
               <div className="mt-4">
-                <p className="text-sm px-4 py-2 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-center">
+                <p className="text-sm px-4 py-2 rounded-xl bg-gray-900 text-gray-300 border border-gray-800 text-center
+                          shadow-[0_0_10px_2px_rgba(255,255,255,0.05)]">
                   {message}
                 </p>
               </div>
