@@ -229,9 +229,9 @@ learning_path_templates = {
                 "video_course": "https://www.coursera.org/learn/ux-design-fundamentals",
                 "practice": "https://www.nngroup.com/articles/",
                 "documentation": "https://www.interaction-design.org/literature"
-            },
+        },
             "projects": [
-                {
+        {
                     "title": "User Research Project",
                     "description": "Conduct user research and create personas for a digital product",
                     "difficulty": "beginner"
@@ -255,9 +255,9 @@ learning_path_templates = {
                 "video_course": "https://www.udacity.com/course/ui-design--ud511",
                 "practice": "https://dribbble.com/learn",
                 "documentation": "https://material.io/design"
-            },
+        },
             "projects": [
-                {
+        {
                     "title": "Design System Creation",
                     "description": "Create a comprehensive design system for a web application",
                     "difficulty": "intermediate"
@@ -281,9 +281,9 @@ learning_path_templates = {
                 "video_course": "https://www.skillshare.com/classes/Figma-for-Beginners",
                 "practice": "https://www.figma.com/community",
                 "documentation": "https://help.figma.com/"
-            },
+        },
             "projects": [
-                {
+        {
                     "title": "Interactive Prototype",
                     "description": "Create a high-fidelity interactive prototype",
                     "difficulty": "intermediate"
@@ -335,9 +335,9 @@ learning_path_templates = {
                 "video_course": "https://www.udacity.com/course/product-manager-nanodegree--nd036",
                 "practice": "https://www.productschool.com/blog/",
                 "documentation": "https://www.atlassian.com/agile/product-management"
-            },
+        },
             "projects": [
-                {
+        {
                     "title": "Product Strategy Document",
                     "description": "Create a comprehensive product strategy",
                     "difficulty": "beginner"
@@ -387,9 +387,9 @@ learning_path_templates = {
                 "video_course": "https://www.scrum.org/resources/training",
                 "practice": "https://www.mountaingoatsoftware.com/agile",
                 "documentation": "https://www.scrumguides.org/"
-            },
+        },
             "projects": [
-                {
+        {
                     "title": "Sprint Planning",
                     "description": "Plan and document a product development sprint",
                     "difficulty": "advanced"

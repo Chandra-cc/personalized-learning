@@ -15,7 +15,7 @@ function App() {
     try {
       const res = await axios.get(`http://localhost:5000/user/${id}`);
       const learningPath = res.data.learning_path;
-      
+
       // Check if learning path exists and has items
       if (Array.isArray(learningPath) && learningPath.length > 0) {
         setFormSubmitted(true);
@@ -28,8 +28,8 @@ function App() {
       console.error("Error checking form submission:", error);
       // Only clear form submitted if there's an actual error
       if (error.response && error.response.status !== 200) {
-        setFormSubmitted(false);
-        localStorage.removeItem("form_submitted");
+      setFormSubmitted(false);
+      localStorage.removeItem("form_submitted");
       } else {
         // If it's a network error, keep the existing state
         const wasSubmitted = localStorage.getItem("form_submitted") === "true";
@@ -53,7 +53,7 @@ function App() {
         setLoading(false);
       } else {
         // Only check with the server if we're not sure
-        checkFormSubmitted(storedUserId);
+      checkFormSubmitted(storedUserId);
       }
     } else {
       setLoading(false);

@@ -103,12 +103,12 @@ const CompanyPage = ({ onStart }) => {
             and achieve your career goals faster than ever before.
           </p>
           <div className="flex gap-4 justify-center">
-            <button
-              onClick={onStart}
+          <button
+            onClick={onStart}
               className="px-8 py-4 bg-gradient-to-r from-gray-800 to-gray-700 text-gray-200 rounded-xl text-lg font-semibold hover:from-gray-700 hover:to-gray-600 transition transform hover:scale-105"
-            >
+          >
               Start Learning Now
-            </button>
+          </button>
             <a
               href="#features"
               className="px-8 py-4 border border-gray-700 text-gray-300 rounded-xl text-lg font-semibold hover:bg-gray-900 transition transform hover:scale-105"
@@ -157,18 +157,18 @@ const CompanyPage = ({ onStart }) => {
           <h3 className="text-4xl font-bold mb-12 text-center text-gray-200">Platform Features</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map(({ icon, title, desc }, idx) => (
-              <div
-                key={idx}
+            <div
+              key={idx}
                 className="bg-gray-900 rounded-xl p-8 border border-gray-800 
                           shadow-[0_0_15px_3px_rgba(255,255,255,0.05)] 
                           hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.1)] 
                           transition-all duration-300 transform hover:scale-[1.02]"
-              >
+            >
                 {icon}
                 <h4 className="text-2xl font-semibold mb-3 text-gray-200">{title}</h4>
                 <p className="text-gray-400 leading-relaxed">{desc}</p>
-              </div>
-            ))}
+            </div>
+          ))}
           </div>
         </section>
 
@@ -289,30 +289,30 @@ const CompanyPage = ({ onStart }) => {
           </div>
           <div className="border-t border-gray-900 pt-8">
             <div className="flex justify-center space-x-6 mb-4">
-              <a
-                href="https://github.com/e-learning-ai"
-                target="_blank"
-                rel="noopener noreferrer"
+            <a
+              href="https://github.com/e-learning-ai"
+              target="_blank"
+              rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-300 transition"
-              >
-                GitHub
-              </a>
-              <a
-                href="https://twitter.com/e_learning_ai"
-                target="_blank"
-                rel="noopener noreferrer"
+            >
+              GitHub
+            </a>
+            <a
+              href="https://twitter.com/e_learning_ai"
+              target="_blank"
+              rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-300 transition"
-              >
-                Twitter
-              </a>
-              <a
-                href="https://linkedin.com/company/e-learning-ai"
-                target="_blank"
-                rel="noopener noreferrer"
+            >
+              Twitter
+            </a>
+            <a
+              href="https://linkedin.com/company/e-learning-ai"
+              target="_blank"
+              rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-300 transition"
-              >
-                LinkedIn
-              </a>
+            >
+              LinkedIn
+            </a>
             </div>
             <p className="text-gray-500">© 2025 E-learning.ai. All rights reserved.</p>
           </div>

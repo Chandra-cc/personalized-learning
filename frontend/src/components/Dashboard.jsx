@@ -551,7 +551,7 @@ const Dashboard = ({ userId, onLogout }) => {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 to-black text-white">
         <div className="flex flex-col items-center gap-4">
-          <div className="loader border-4 border-blue-500 border-t-transparent rounded-full w-12 h-12 animate-spin"></div>
+        <div className="loader border-4 border-blue-500 border-t-transparent rounded-full w-12 h-12 animate-spin"></div>
           <p className="text-xl font-medium text-gray-300">Loading your learning journey...</p>
         </div>
       </div>
@@ -603,7 +603,7 @@ const Dashboard = ({ userId, onLogout }) => {
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-gray-800 rounded-xl">
                 <FaBook className="text-2xl text-gray-200" />
-              </div>
+          </div>
               <h1 className="text-2xl font-bold text-gray-100">
                 E-Learning.AI
               </h1>
@@ -623,11 +623,11 @@ const Dashboard = ({ userId, onLogout }) => {
                 </span>
               </div>
               <div className="relative h-3 bg-gray-800 rounded-full overflow-hidden">
-                <div
+              <div
                   className="absolute left-0 top-0 h-full bg-gradient-to-r from-gray-700 to-gray-600 rounded-full 
                            transition-all duration-700 shadow-lg"
-                  style={{ width: `${progressPercent}%` }}
-                />
+                style={{ width: `${progressPercent}%` }}
+              />
               </div>
             </div>
 
@@ -771,8 +771,8 @@ const Dashboard = ({ userId, onLogout }) => {
             {recommendations.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {recommendations.map((rec, index) => (
-                  <div
-                    key={index}
+                <div
+                  key={index}
                     className="p-6 bg-gray-900 rounded-2xl border border-gray-700 
                               shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
                               hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
@@ -850,18 +850,18 @@ const Dashboard = ({ userId, onLogout }) => {
                     onComplete={handleComplete}
                     analytics={typeof stepProgress === 'object' ? stepProgress : null}
                   />
-                );
-              })}
+              );
+            })}
             </div>
           </div>
-        </div>
-      </main>
+          </div>
+        </main>
 
-      <UserDetailsModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        userData={userData}
-      />
+        <UserDetailsModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          userData={userData}
+        />
     </div>
   );
 };
