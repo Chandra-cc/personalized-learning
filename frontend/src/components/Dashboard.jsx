@@ -19,17 +19,45 @@ import {
 const UserDetailsModal = memo(({ isOpen, onClose, userData }) => {
   if (!isOpen) return null;
 
+  // Helper to render array or comma-separated string
+  const renderArray = (arr) => {
+    if (!arr) return "Not set";
+    if (typeof arr === "string") {
+      try {
+        const parsed = JSON.parse(arr);
+        if (Array.isArray(parsed)) return parsed.join(", ");
+        return arr;
+      } catch {
+        return arr;
+      }
+    }
+    if (Array.isArray(arr)) return arr.join(", ");
+    return arr;
+  };
+
+  // Helper to render object
+  const renderObject = (obj) => {
+    if (!obj || typeof obj !== "object") return "Not set";
+    return (
+      <ul className="list-disc list-inside text-gray-300 text-sm">
+        {Object.entries(obj).map(([k, v]) => (
+          <li key={k}><span className="font-medium text-gray-200">{k}:</span> {v}</li>
+        ))}
+      </ul>
+    );
+  };
+
+  // Flatten preferences for easier access
+  const prefs = userData.preferences || {};
+
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex justify-center items-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-gray-900 text-gray-100 rounded-2xl p-8 max-w-md w-full 
-                  shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
-                  hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
-                  border border-gray-700"
-        onClick={(e) => e.stopPropagation()}
+        className="bg-gray-900 text-gray-100 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-lg"
+        onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center gap-4 mb-6">
           <div className="p-3 bg-gray-800 rounded-xl">
@@ -40,29 +68,130 @@ const UserDetailsModal = memo(({ isOpen, onClose, userData }) => {
             <p className="text-gray-300">{userData.email}</p>
           </div>
         </div>
-        
-        <div className="space-y-4">
-          <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-            <p className="text-sm text-gray-300 mb-1">Learning Goal</p>
-            <p className="font-medium text-gray-100">{userData.goal || "Not set"}</p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Learning Goal</p>
+              <p className="font-medium text-gray-100">{userData.goal || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Difficulty Preference</p>
+              <p className="font-medium text-gray-100">{prefs.difficulty_preference || "Not set"}</p>
+            </div>
             <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
               <p className="text-sm text-gray-300 mb-1">Age</p>
               <p className="font-medium text-gray-100">{userData.age || "Not set"}</p>
             </div>
             <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Gender</p>
+              <p className="font-medium text-gray-100">{userData.gender || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
               <p className="text-sm text-gray-300 mb-1">Education</p>
               <p className="font-medium text-gray-100">{userData.education || "Not set"}</p>
             </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Current Role</p>
+              <p className="font-medium text-gray-100">{userData.current_role || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Years of Experience</p>
+              <p className="font-medium text-gray-100">{userData.years_of_experience || prefs.years_of_experience || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Industry</p>
+              <p className="font-medium text-gray-100">{userData.industry || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Career Goals</p>
+              <p className="font-medium text-gray-100">{renderArray(userData.career_goals || prefs.career_goals)}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Learning Style</p>
+              <p className="font-medium text-gray-100">{prefs.learning_style || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Preferred Content Types</p>
+              <p className="font-medium text-gray-100">{renderArray(prefs.preferred_content_types)}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Session Duration (min)</p>
+              <p className="font-medium text-gray-100">{prefs.preferred_session_duration || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Learning Environment</p>
+              <p className="font-medium text-gray-100">{prefs.learning_environment || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Available Hours/Week</p>
+              <p className="font-medium text-gray-100">{prefs.available_hours_per_week || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Preferred Learning Time</p>
+              <p className="font-medium text-gray-100">{prefs.preferred_learning_time || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Daily Goal (min)</p>
+              <p className="font-medium text-gray-100">{prefs.daily_goal_minutes || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Preferred Deadline</p>
+              <p className="font-medium text-gray-100">{userData.preferred_deadline || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Education Level</p>
+              <p className="font-medium text-gray-100">{userData.education_level || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Certifications</p>
+              <p className="font-medium text-gray-100">{renderArray(userData.certifications)}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Skills Self-Assessment</p>
+              {userData.skills_self_assessment && Object.keys(userData.skills_self_assessment).length > 0
+                ? renderObject(userData.skills_self_assessment)
+                : "Not set"}
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Collaboration Preference</p>
+              <p className="font-medium text-gray-100">{userData.collaboration_preference || "Not set"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Mentorship Interest</p>
+              <p className="font-medium text-gray-100">{userData.mentorship_interest ? "Yes" : "No"}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Preferred Teaching Styles</p>
+              <p className="font-medium text-gray-100">{renderArray(userData.preferred_teaching_styles)}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Preferred Tools</p>
+              <p className="font-medium text-gray-100">{renderArray(userData.preferred_tools)}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Device Constraints</p>
+              {userData.device_constraints && Object.keys(userData.device_constraints).length > 0
+                ? renderObject(userData.device_constraints)
+                : "Not set"}
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Accessibility Needs</p>
+              <p className="font-medium text-gray-100">{renderArray(userData.accessibility_needs)}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Motivation Factors</p>
+              <p className="font-medium text-gray-100">{renderArray(userData.motivation_factors)}</p>
+            </div>
+            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
+              <p className="text-sm text-gray-300 mb-1">Interests</p>
+              <p className="font-medium text-gray-100">{renderArray(userData.interests)}</p>
+            </div>
           </div>
         </div>
-
         <button
           onClick={onClose}
-          className="mt-6 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 
-                     px-4 py-3 rounded-xl text-gray-100 w-full font-medium transition-all duration-300 
+          className="mt-6 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 \
+                     px-4 py-3 rounded-xl text-gray-100 w-full font-medium transition-all duration-300 \
                      transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]"
         >
           Close

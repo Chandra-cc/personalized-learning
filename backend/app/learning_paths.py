@@ -3,108 +3,109 @@
 learning_path_templates = {
     "Become a Data Scientist": [
         {
-            "title": "Python Basics",
+            "title": "Python Programming Fundamentals (Beginner)",
             "duration": "1 week",
-            "description": "Master fundamental Python concepts essential for data science",
-            "learning_objectives": [
-                "Understand Python syntax and data types",
-                "Work with lists, dictionaries, and sets",
-                "Write functions and handle exceptions",
-                "Use list comprehensions and generators"
-            ],
+            "description": "Learn Python basics, syntax, and data structures.",
+            "difficulty": "beginner",
             "resources": {
-                "primary": "https://www.learnpython.org/",
-                "video_course": "https://www.coursera.org/learn/python-for-data-science",
-                "practice": "https://www.hackerrank.com/domains/python",
-                "documentation": "https://docs.python.org/3/"
+                "video": "https://www.youtube.com/playlist?list=PL-osiE80TeTt2d9bfVyTiXJA-UTHn6WwU",
+                "documentation": "https://docs.python.org/3/tutorial/",
+                "practice": "https://www.hackerrank.com/domains/tutorials/10-days-of-python"
             },
             "projects": [
-                {
-                    "title": "Data Analysis Script",
-                    "description": "Create a script to analyze and visualize a dataset",
-                    "difficulty": "beginner"
-                }
+                {"title": "Simple Data Analysis Script", "difficulty": "beginner"}
             ],
-            "prerequisites": [],
-            "skills_gained": ["Python Programming", "Basic Data Structures", "File Handling"]
+            "skills_gained": ["Python", "Data Structures", "Basic Scripting"]
         },
         {
-            "title": "Statistics for Data Science",
+            "title": "Math & Statistics for Data Science (Beginner)",
             "duration": "1 week",
-            "description": "Learn essential statistical concepts for data analysis",
-            "learning_objectives": [
-                "Understand descriptive statistics",
-                "Master probability distributions",
-                "Perform hypothesis testing",
-                "Apply statistical inference"
-            ],
+            "description": "Master statistics, probability, and linear algebra essentials.",
+            "difficulty": "beginner",
             "resources": {
-                "primary": "https://www.khanacademy.org/math/statistics-probability",
-                "video_course": "https://www.edx.org/course/statistical-thinking-for-data-science",
-                "practice": "https://www.kaggle.com/learn/intro-to-statistics",
-                "documentation": "https://www.statsmodels.org/stable/index.html"
+                "video": "https://www.youtube.com/playlist?list=PLblh5JKOoLUIxGDQs4LFFD--41Vzf-ME1",
+                "documentation": "https://www.khanacademy.org/math/statistics-probability",
+                "practice": "https://www.kaggle.com/learn/intro-to-statistics"
             },
             "projects": [
-                {
-                    "title": "Statistical Analysis Report",
-                    "description": "Analyze a real-world dataset using statistical methods",
-                    "difficulty": "intermediate"
-                }
+                {"title": "Statistical Analysis of a Dataset", "difficulty": "beginner"}
             ],
-            "prerequisites": ["Python Basics"],
-            "skills_gained": ["Statistical Analysis", "Probability Theory", "Data Interpretation"]
+            "skills_gained": ["Statistics", "Probability", "Linear Algebra"]
         },
         {
-            "title": "Pandas & NumPy",
+            "title": "Data Wrangling & Visualization (Intermediate)",
             "duration": "1 week",
-            "description": "Master data manipulation and numerical computing libraries",
-            "learning_objectives": [
-                "Perform data manipulation with Pandas",
-                "Use NumPy for numerical computations",
-                "Clean and preprocess data",
-                "Create data visualizations"
-            ],
+            "description": "Learn to clean, manipulate, and visualize data using Pandas, NumPy, and Matplotlib.",
+            "difficulty": "intermediate",
             "resources": {
-                "primary": "https://www.datacamp.com/courses/pandas-foundations",
-                "video_course": "https://www.udemy.com/course/data-analysis-with-pandas",
-                "practice": "https://pandas.pydata.org/docs/getting_started/tutorials.html",
-                "documentation": "https://pandas.pydata.org/docs/"
+                "video": "https://www.youtube.com/playlist?list=PLQVvvaa0QuDfKTOs3Keq_kaG2P55YRn5v",
+                "documentation": "https://pandas.pydata.org/docs/",
+                "practice": "https://www.kaggle.com/learn/pandas"
             },
             "projects": [
-                {
-                    "title": "Data Cleaning Pipeline",
-                    "description": "Build a data preprocessing pipeline for messy datasets",
-                    "difficulty": "intermediate"
-                }
+                {"title": "Exploratory Data Analysis (EDA) Project", "difficulty": "intermediate"}
             ],
-            "prerequisites": ["Python Basics", "Statistics for Data Science"],
-            "skills_gained": ["Data Manipulation", "Data Cleaning", "Data Visualization"]
+            "skills_gained": ["Pandas", "NumPy", "Matplotlib", "EDA"]
         },
         {
-            "title": "Machine Learning Basics",
+            "title": "Machine Learning Foundations (Intermediate)",
             "duration": "2 weeks",
-            "description": "Introduction to machine learning algorithms and techniques",
-            "learning_objectives": [
-                "Understand supervised and unsupervised learning",
-                "Implement classification and regression models",
-                "Evaluate model performance",
-                "Perform feature engineering"
-            ],
+            "description": "Supervised and unsupervised learning, model evaluation, and feature engineering.",
+            "difficulty": "intermediate",
             "resources": {
-                "primary": "https://www.coursera.org/learn/machine-learning",
-                "video_course": "https://www.fast.ai/",
-                "practice": "https://scikit-learn.org/stable/auto_examples/index.html",
-                "documentation": "https://scikit-learn.org/stable/"
+                "video": "https://www.coursera.org/learn/machine-learning",
+                "documentation": "https://scikit-learn.org/stable/user_guide.html",
+                "practice": "https://www.kaggle.com/learn/intro-to-machine-learning"
             },
             "projects": [
-                {
-                    "title": "Predictive Model Development",
-                    "description": "Build and deploy a machine learning model",
-                    "difficulty": "advanced"
-                }
+                {"title": "Build a Classification Model", "difficulty": "intermediate"}
             ],
-            "prerequisites": ["Python Basics", "Statistics for Data Science", "Pandas & NumPy"],
-            "skills_gained": ["Machine Learning", "Model Evaluation", "Feature Engineering"]
+            "skills_gained": ["Supervised Learning", "Unsupervised Learning", "Model Evaluation"]
+        },
+        {
+            "title": "Deep Learning & Neural Networks (Advanced)",
+            "duration": "2 weeks",
+            "description": "Introduction to deep learning, neural networks, and frameworks like TensorFlow and PyTorch.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLWKjhJtqVAbkFiqHnNaxpOPhh9tSWMXIF",
+                "documentation": "https://www.tensorflow.org/tutorials",
+                "practice": "https://www.kaggle.com/learn/deep-learning"
+            },
+            "projects": [
+                {"title": "Image Classification with Neural Networks", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Deep Learning", "Neural Networks", "TensorFlow", "PyTorch"]
+        },
+        {
+            "title": "NLP & Text Analytics (Advanced)",
+            "duration": "1 week",
+            "description": "Natural Language Processing, text cleaning, sentiment analysis, and NER.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLamzFoFxwoNjPfxzaWqs7cZGsPYy0x_gI",
+                "documentation": "https://www.nltk.org/",
+                "practice": "https://www.kaggle.com/learn/natural-language-processing"
+            },
+            "projects": [
+                {"title": "Sentiment Analysis Project", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["NLP", "Text Analytics", "Sentiment Analysis"]
+        },
+        {
+            "title": "Capstone Project: Real-World Data Science",
+            "duration": "2 weeks",
+            "description": "Apply all skills to a real-world dataset, from EDA to model deployment.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/watch?v=ua-CiDNNj30",
+                "documentation": "https://docs.streamlit.io/",
+                "practice": "https://www.kaggle.com/competitions"
+            },
+            "projects": [
+                {"title": "End-to-End Data Science Project", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Project Management", "Deployment", "Full Data Science Cycle"]
         }
     ],
     "Become a Web Developer": [
@@ -578,5 +579,426 @@ learning_path_templates = {
             "duration": "2 weeks",
             "resource": "https://www.udacity.com/course/machine-learning-engineer-nanodegree--nd009t"
         }
-    ]
+    ],
+    "Become a DevOps Engineer": [
+        {
+            "title": "Linux & Scripting Fundamentals (Beginner)",
+            "duration": "1 week",
+            "description": "Learn Linux basics and shell scripting for automation.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLS1QulWo1RIb9WVQGJ_vh-RQusbZgO_As",
+                "documentation": "https://ryanstutorials.net/linuxtutorial/",
+                "practice": "https://www.hackerrank.com/domains/tutorials/10-days-of-javascript"
+            },
+            "projects": [
+                {"title": "Automate a Backup Script", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["Linux", "Shell Scripting", "Automation"]
+        },
+        {
+            "title": "Version Control with Git (Beginner)",
+            "duration": "1 week",
+            "description": "Master Git for source code management and collaboration.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLg7s6cbtAD17Gw5u8644bgKhgRLiJXdX4",
+                "documentation": "https://git-scm.com/doc",
+                "practice": "https://www.codecademy.com/learn/learn-git"
+            },
+            "projects": [
+                {"title": "Collaborative Repo Project", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["Git", "Version Control", "Collaboration"]
+        },
+        {
+            "title": "CI/CD & Automation (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Learn Continuous Integration/Deployment using Jenkins, GitHub Actions, or GitLab CI.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLy7NrYWoggjziYQIDorlXjTvvwweTYoNC",
+                "documentation": "https://docs.github.com/en/actions",
+                "practice": "https://www.jenkins.io/doc/tutorials/"
+            },
+            "projects": [
+                {"title": "Set Up a CI/CD Pipeline", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["CI/CD", "Jenkins", "GitHub Actions", "Automation"]
+        },
+        {
+            "title": "Docker & Containerization (Intermediate)",
+            "duration": "1 week",
+            "description": "Containerize applications using Docker and manage images.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLy7NrYWoggjziYQIDorlXjTvvwweTYoNC",
+                "documentation": "https://docs.docker.com/get-started/",
+                "practice": "https://www.katacoda.com/courses/docker"
+            },
+            "projects": [
+                {"title": "Dockerize a Web App", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["Docker", "Containerization", "DevOps"]
+        },
+        {
+            "title": "Kubernetes & Orchestration (Advanced)",
+            "duration": "2 weeks",
+            "description": "Deploy and manage containers at scale using Kubernetes.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLy7NrYWoggjziYQIDorlXjTvvwweTYoNC",
+                "documentation": "https://kubernetes.io/docs/tutorials/",
+                "practice": "https://www.katacoda.com/courses/kubernetes"
+            },
+            "projects": [
+                {"title": "Deploy a Multi-Service App on Kubernetes", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Kubernetes", "Orchestration", "Cloud Native"]
+        }
+    ],
+    "Become a Cloud Engineer": [
+        {
+            "title": "Cloud Fundamentals (Beginner)",
+            "duration": "1 week",
+            "description": "Understand cloud computing basics and service models (IaaS, PaaS, SaaS).",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/watch?v=2LaAJq1lB1Q",
+                "documentation": "https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-cloud-computing/",
+                "practice": "https://www.qwiklabs.com/"
+            },
+            "projects": [
+                {"title": "Deploy a Static Website on the Cloud", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["Cloud Basics", "IaaS", "PaaS", "SaaS"]
+        },
+        {
+            "title": "AWS/GCP/Azure Core Services (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Learn core services of AWS, GCP, or Azure (compute, storage, networking).",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLgxF613RsGoUuJd6gZtqHq3p6U6zvF1vG",
+                "documentation": "https://docs.aws.amazon.com/",
+                "practice": "https://www.qwiklabs.com/"
+            },
+            "projects": [
+                {"title": "Launch a VM and Set Up Networking", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["AWS", "GCP", "Azure", "Cloud Services"]
+        },
+        {
+            "title": "Infrastructure as Code (IaC) (Intermediate)",
+            "duration": "1 week",
+            "description": "Automate cloud infrastructure using Terraform or CloudFormation.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PL2jykFOD1AWZkqU2v7yqA1KQ5p1U1Q1rF",
+                "documentation": "https://www.terraform.io/docs/",
+                "practice": "https://learn.hashicorp.com/collections/terraform/aws-get-started"
+            },
+            "projects": [
+                {"title": "Provision Infrastructure with Terraform", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["Terraform", "CloudFormation", "IaC"]
+        },
+        {
+            "title": "Cloud Security & Monitoring (Advanced)",
+            "duration": "1 week",
+            "description": "Implement security best practices and monitor cloud resources.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLgxF613RsGoUuJd6gZtqHq3p6U6zvF1vG",
+                "documentation": "https://docs.aws.amazon.com/security/",
+                "practice": "https://www.qwiklabs.com/"
+            },
+            "projects": [
+                {"title": "Set Up Cloud Monitoring & Alerts", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Cloud Security", "Monitoring", "Best Practices"]
+        }
+    ],
+    "Become an AI Product Manager": [
+        {
+            "title": "AI & ML Fundamentals (Beginner)",
+            "duration": "1 week",
+            "description": "Understand the basics of AI, ML, and their business applications.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/watch?v=JMUxmLyrhSk",
+                "documentation": "https://developers.google.com/machine-learning/glossary",
+                "practice": "https://www.coursera.org/learn/ai-for-everyone"
+            },
+            "projects": [
+                {"title": "AI Use Case Analysis", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["AI Basics", "ML Basics", "Business Applications"]
+        },
+        {
+            "title": "Product Management for AI (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Learn how to manage AI/ML projects, data pipelines, and cross-functional teams.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/watch?v=5vVZbBzG5H8",
+                "documentation": "https://www.productplan.com/learn/ai-product-management/",
+                "practice": "https://www.coursera.org/learn/ai-product-management"
+            },
+            "projects": [
+                {"title": "Design an AI Product Roadmap", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["AI Product Management", "Data Pipelines", "Team Leadership"]
+        },
+        {
+            "title": "Ethics & Responsible AI (Advanced)",
+            "duration": "1 week",
+            "description": "Explore ethical considerations and responsible AI deployment.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/watch?v=8oHd3hFjK6A",
+                "documentation": "https://ai.google/responsibilities/responsible-ai-practices/",
+                "practice": "https://www.coursera.org/learn/ai-ethics"
+            },
+            "projects": [
+                {"title": "Draft an AI Ethics Policy", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["AI Ethics", "Responsible AI", "Policy"]
+        }
+    ],
+    "Become a Data Engineer": [
+        {
+            "title": "SQL & Databases (Beginner)",
+            "duration": "1 week",
+            "description": "Learn SQL and relational database fundamentals.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLSE8ODhjZXjbohkNBWQs_otTrBTrjyohi",
+                "documentation": "https://www.sqltutorial.org/",
+                "practice": "https://www.hackerrank.com/domains/sql"
+            },
+            "projects": [
+                {"title": "Design a Simple Database", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["SQL", "Databases", "Data Modeling"]
+        },
+        {
+            "title": "ETL & Data Pipelines (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Build ETL pipelines using Python and open-source tools.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLy7NrYWoggjziYQIDorlXjTvvwweTYoNC",
+                "documentation": "https://airflow.apache.org/docs/",
+                "practice": "https://www.kaggle.com/learn/data-engineering"
+            },
+            "projects": [
+                {"title": "Build an ETL Pipeline", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["ETL", "Data Pipelines", "Airflow"]
+        },
+        {
+            "title": "Big Data & Distributed Systems (Advanced)",
+            "duration": "2 weeks",
+            "description": "Work with big data tools like Hadoop and Spark.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLBzScQzZ83I8P1qg8l5U1Q1rF",
+                "documentation": "https://spark.apache.org/docs/latest/",
+                "practice": "https://www.kaggle.com/learn/big-data"
+            },
+            "projects": [
+                {"title": "Process Large Datasets with Spark", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Big Data", "Hadoop", "Spark"]
+        }
+    ],
+    "Become a Frontend Engineer": [
+        {
+            "title": "HTML, CSS, and JavaScript (Beginner)",
+            "duration": "1 week",
+            "description": "Learn the basics of web development: HTML, CSS, and JavaScript.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLillGF-RfqbZTASqIqdvm1R5mLrQq79CU",
+                "documentation": "https://developer.mozilla.org/en-US/docs/Web",
+                "practice": "https://www.freecodecamp.org/learn/"
+            },
+            "projects": [
+                {"title": "Personal Portfolio Website", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["HTML", "CSS", "JavaScript"]
+        },
+        {
+            "title": "Modern JavaScript & Frameworks (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Master ES6+ JavaScript and frameworks like React or Vue.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PL4cUxeGkcC9gcy9lrvMJ75z9maRw4byYp",
+                "documentation": "https://reactjs.org/docs/getting-started.html",
+                "practice": "https://www.codecademy.com/learn/react-101"
+            },
+            "projects": [
+                {"title": "Build a React App", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["React", "Vue", "Modern JavaScript"]
+        },
+        {
+            "title": "Frontend Testing & Optimization (Advanced)",
+            "duration": "1 week",
+            "description": "Test and optimize frontend applications for performance and accessibility.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PL4cUxeGkcC9gcy9lrvMJ75z9maRw4byYp",
+                "documentation": "https://jestjs.io/docs/getting-started",
+                "practice": "https://www.freecodecamp.org/learn/"
+            },
+            "projects": [
+                {"title": "Test and Optimize a Web App", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Testing", "Performance", "Accessibility"]
+        }
+    ],
+    "Become a Backend Engineer": [
+        {
+            "title": "Backend Fundamentals (Beginner)",
+            "duration": "1 week",
+            "description": "Learn backend basics: HTTP, REST, and server-side programming.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLillGF-RfqbZ2ybcoD2OaabW2P7Ws8CWu",
+                "documentation": "https://developer.mozilla.org/en-US/docs/Learn/Server-side",
+                "practice": "https://www.freecodecamp.org/learn/"
+            },
+            "projects": [
+                {"title": "Simple REST API", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["HTTP", "REST", "Server-side Programming"]
+        },
+        {
+            "title": "Databases & Authentication (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Work with SQL/NoSQL databases and implement authentication.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLillGF-RfqbZ2ybcoD2OaabW2P7Ws8CWu",
+                "documentation": "https://www.mongodb.com/docs/",
+                "practice": "https://www.hackerrank.com/domains/sql"
+            },
+            "projects": [
+                {"title": "User Auth System", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["SQL", "NoSQL", "Authentication"]
+        },
+        {
+            "title": "API Design & Microservices (Advanced)",
+            "duration": "2 weeks",
+            "description": "Design scalable APIs and build microservices.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLillGF-RfqbZ2ybcoD2OaabW2P7Ws8CWu",
+                "documentation": "https://microservices.io/",
+                "practice": "https://www.freecodecamp.org/learn/"
+            },
+            "projects": [
+                {"title": "Microservice Architecture Project", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["API Design", "Microservices", "Scalability"]
+        }
+    ],
+    "Become a Blockchain Developer": [
+        {
+            "title": "Blockchain Basics (Beginner)",
+            "duration": "1 week",
+            "description": "Understand blockchain fundamentals and smart contracts.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PL6QwHk6lCo7W3a7xg3Bz6l2Qp1dQ5Q1rF",
+                "documentation": "https://ethereum.org/en/developers/docs/",
+                "practice": "https://cryptozombies.io/"
+            },
+            "projects": [
+                {"title": "Write a Simple Smart Contract", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["Blockchain", "Smart Contracts", "Ethereum"]
+        },
+        {
+            "title": "DApps & Solidity (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Develop decentralized applications using Solidity and Web3.js.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PL6QwHk6lCo7W3a7xg3Bz6l2Qp1dQ5Q1rF",
+                "documentation": "https://soliditylang.org/docs/",
+                "practice": "https://cryptozombies.io/"
+            },
+            "projects": [
+                {"title": "Build a DApp", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["DApps", "Solidity", "Web3.js"]
+        },
+        {
+            "title": "Blockchain Security & Scaling (Advanced)",
+            "duration": "2 weeks",
+            "description": "Learn about blockchain security, consensus, and scaling solutions.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PL6QwHk6lCo7W3a7xg3Bz6l2Qp1dQ5Q1rF",
+                "documentation": "https://ethereum.org/en/developers/docs/security/",
+                "practice": "https://www.hackerrank.com/domains/tutorials/10-days-of-javascript"
+            },
+            "projects": [
+                {"title": "Audit a Smart Contract", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Security", "Consensus", "Scaling"]
+        }
+    ],
+    "Become a Cybersecurity Analyst": [
+        {
+            "title": "Cybersecurity Fundamentals (Beginner)",
+            "duration": "1 week",
+            "description": "Learn the basics of cybersecurity, threats, and vulnerabilities.",
+            "difficulty": "beginner",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLBf0hzazHTGMdH1xKXyQbK6b0Q1rF",
+                "documentation": "https://www.coursera.org/specializations/ibm-cybersecurity-analyst",
+                "practice": "https://www.cybrary.it/catalog/cyber-security/"
+            },
+            "projects": [
+                {"title": "Threat Analysis Report", "difficulty": "beginner"}
+            ],
+            "skills_gained": ["Cybersecurity", "Threat Analysis", "Vulnerabilities"]
+        },
+        {
+            "title": "Network Security & Tools (Intermediate)",
+            "duration": "2 weeks",
+            "description": "Work with network security tools and protocols.",
+            "difficulty": "intermediate",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLBf0hzazHTGMdH1xKXyQbK6b0Q1rF",
+                "documentation": "https://www.cisco.com/c/en/us/products/security/what-is-network-security.html",
+                "practice": "https://www.cybrary.it/catalog/cyber-security/"
+            },
+            "projects": [
+                {"title": "Configure a Firewall & IDS", "difficulty": "intermediate"}
+            ],
+            "skills_gained": ["Network Security", "Firewalls", "IDS"]
+        },
+        {
+            "title": "Incident Response & Forensics (Advanced)",
+            "duration": "2 weeks",
+            "description": "Learn incident response, digital forensics, and reporting.",
+            "difficulty": "advanced",
+            "resources": {
+                "video": "https://www.youtube.com/playlist?list=PLBf0hzazHTGMdH1xKXyQbK6b0Q1rF",
+                "documentation": "https://www.coursera.org/specializations/ibm-cybersecurity-analyst",
+                "practice": "https://www.cybrary.it/catalog/cyber-security/"
+            },
+            "projects": [
+                {"title": "Incident Response Simulation", "difficulty": "advanced"}
+            ],
+            "skills_gained": ["Incident Response", "Forensics", "Reporting"]
+        }
+    ],
 }

@@ -16,8 +16,8 @@ def get_closest_goal(user_input, available_goals):
 
 def generate_learning_path(goal, user_preferences=None):
     """
-    Generate a learning path based on templates and basic user preferences.
-    No AI involvement - purely rule-based customization.
+    Generate a learning path based on templates and user preferences.
+    Now uses more user data for personalization.
     """
     all_goals = list(learning_path_templates.keys())
     matched_goal = get_closest_goal(goal, all_goals)
@@ -27,41 +27,100 @@ def generate_learning_path(goal, user_preferences=None):
         
     base_path = learning_path_templates.get(matched_goal, [])
     
-    # If we have user preferences, customize the path
     if user_preferences:
         customized_path = []
-        for step in base_path:
-            customized_step = step.copy()  # Create a copy to modify
-            
-            # Adjust duration based on difficulty preference
-            if user_preferences.difficulty_preference == "beginner":
-                if "duration" in customized_step:
-                    duration = customized_step["duration"].split()
-                    if len(duration) == 2:
-                        weeks = float(duration[0]) * 1.5
-                        customized_step["duration"] = f"{weeks} {duration[1]}"
-            elif user_preferences.difficulty_preference == "advanced":
-                if "duration" in customized_step:
-                    duration = customized_step["duration"].split()
-                    if len(duration) == 2:
-                        weeks = max(1, float(duration[0]) / 1.5)
-                        customized_step["duration"] = f"{weeks} {duration[1]}"
+        # Extract more preferences
+        preferred_content_types = []
+        if hasattr(user_preferences, 'preferred_content_types') and user_preferences.preferred_content_types:
+            try:
+                preferred_content_types = json.loads(user_preferences.preferred_content_types)
+            except Exception:
+                preferred_content_types = [user_preferences.preferred_content_types]
+        available_hours = None
+        if hasattr(user_preferences, 'available_hours_per_week'):
+            try:
+                available_hours = float(user_preferences.available_hours_per_week)
+            except Exception:
+                available_hours = None
+        years_of_experience = None
+        if hasattr(user_preferences, 'years_of_experience'):
+            try:
+                years_of_experience = float(user_preferences.years_of_experience)
+            except Exception:
+                years_of_experience = None
+        career_goals = []
+        if hasattr(user_preferences, 'career_goals') and user_preferences.career_goals:
+            try:
+                career_goals = json.loads(user_preferences.career_goals)
+            except Exception:
+                career_goals = [user_preferences.career_goals]
 
-            # Add resources based on learning style
-            if "resources" not in customized_step:
-                customized_step["resources"] = {}
-                
-            if user_preferences.learning_style == "visual":
-                customized_step["resources"]["recommended_type"] = "video"
-            elif user_preferences.learning_style == "reading":
-                customized_step["resources"]["recommended_type"] = "documentation"
-            elif user_preferences.learning_style == "practical":
-                customized_step["resources"]["recommended_type"] = "practice"
+        for step in base_path:
+            customized_step = step.copy()
+
+            # 1. Skip beginner steps if user is experienced
+            if years_of_experience is not None and years_of_experience > 2:
+                if 'beginner' in str(customized_step.get('title', '')).lower() or \
+                   any('beginner' in str(p.get('difficulty', '')).lower() for p in customized_step.get('projects', [])):
+                    continue  # Skip this step
+
+            # 2. Adjust duration based on difficulty and available hours
+            if 'duration' in customized_step:
+                duration = customized_step['duration'].split()
+                if len(duration) == 2:
+                    weeks = float(duration[0])
+                    # Adjust for difficulty
+                    if user_preferences.difficulty_preference == "beginner":
+                        weeks *= 1.5
+                    elif user_preferences.difficulty_preference == "advanced":
+                        weeks = max(1, weeks / 1.5)
+                    # Adjust for available hours
+                    if available_hours is not None and available_hours < 7:
+                        weeks *= 1.2
+                    elif available_hours is not None and available_hours > 14:
+                        weeks *= 0.8
+                    customized_step['duration'] = f"{round(weeks,1)} {duration[1]}"
+
+            # 3. Prioritize resources based on content type and learning style
+            if 'resources' not in customized_step:
+                customized_step['resources'] = {}
+            recommended_type = None
+            if preferred_content_types:
+                recommended_type = preferred_content_types[0]
+            elif hasattr(user_preferences, 'learning_style'):
+                style = user_preferences.learning_style
+                if style == "visual":
+                    recommended_type = "video"
+                elif style == "reading":
+                    recommended_type = "documentation"
+                elif style == "practical":
+                    recommended_type = "practice"
+            if recommended_type:
+                customized_step['resources']['recommended_type'] = recommended_type
+
+            # 4. Annotate step if it matches a career goal
+            if career_goals:
+                for cg in career_goals:
+                    if cg.lower() in customized_step.get('title', '').lower():
+                        customized_step['highlight_for_career_goal'] = True
 
             customized_path.append(customized_step)
-        
+
+        # 5. Optionally add elective step for career goals not covered
+        covered_titles = [s['title'].lower() for s in customized_path]
+        for cg in career_goals:
+            if not any(cg.lower() in t for t in covered_titles):
+                customized_path.append({
+                    'title': f'Elective: {cg}',
+                    'description': f'Explore resources and projects related to {cg}',
+                    'duration': '1 week',
+                    'resources': {},
+                    'projects': [],
+                    'highlight_for_career_goal': True
+                })
+
         return customized_path
-                
+    
     return base_path
 
 # ----------------- AUTH -----------------
@@ -151,7 +210,7 @@ def submit_user_data():
         preference_fields = [
             'learning_style', 'difficulty_preference', 'preferred_content_types',
             'preferred_session_duration', 'available_hours_per_week',
-            'learning_environment', 'career_goals'
+            'learning_environment', 'career_goals', 'years_of_experience'
         ]
         
         for field in preference_fields:

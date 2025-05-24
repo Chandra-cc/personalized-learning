@@ -1,4 +1,4 @@
-import React, { useState, memo } from "react";
+import React, { useState, memo, useRef } from "react";
 import PropTypes from "prop-types";
 import { FaArrowLeft, FaCheck } from "react-icons/fa";
 import "../styles/animations.css";
@@ -19,6 +19,28 @@ const isStepComplete = (formData, step) => {
       return false;
   }
 };
+
+const goalOptions = [
+  "Become a Data Scientist",
+  "Become a Web Developer",
+  "Become a UI/UX Designer",
+  "Become a Product Manager",
+  "Become an Ethical Hacker",
+  "Become a Mobile App Developer",
+  "Become a Data Analyst",
+  "Become a Software Engineer",
+  "Become a Digital Marketer",
+  "Become a Cybersecurity Specialist",
+  "Become a Machine Learning Engineer",
+  "Become a DevOps Engineer",
+  "Become a Cloud Engineer",
+  "Become an AI Product Manager",
+  "Become a Data Engineer",
+  "Become a Frontend Engineer",
+  "Become a Backend Engineer",
+  "Become a Blockchain Developer",
+  "Become a Cybersecurity Analyst"
+];
 
 const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -75,6 +97,14 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
     career_goals: '',
     preferred_content_types: ''
   });
+
+  const [goalInput, setGoalInput] = useState("");
+  const [showGoalDropdown, setShowGoalDropdown] = useState(false);
+  const goalInputRef = useRef(null);
+
+  const filteredGoals = goalOptions.filter(option =>
+    option.toLowerCase().includes(goalInput.toLowerCase())
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -377,22 +407,41 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
             <div className="space-y-6">
               <div>
                 <label className="block text-gray-300 mb-2">Primary Learning Goal</label>
-                <select
-                  name="goal"
-                  value={formData.goal}
-                  onChange={handleInputChange}
-                  className="w-full bg-gray-800 rounded-xl px-4 py-3 text-gray-100"
-                >
-                  <option value="">Select Goal</option>
-                  <option value="Become a Data Scientist">Become a Data Scientist</option>
-                  <option value="Become a Web Developer">Become a Web Developer</option>
-                  <option value="Become a UI/UX Designer">Become a UI/UX Designer</option>
-                  <option value="Become a Product Manager">Become a Product Manager</option>
-                  <option value="Become an Ethical Hacker">Become an Ethical Hacker</option>
-                  <option value="Become a Mobile App Developer">Become a Mobile App Developer</option>
-                  <option value="Become a Data Analyst">Become a Data Analyst</option>
-                  <option value="Become a Software Engineer">Become a Software Engineer</option>
-                </select>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="goal"
+                    autoComplete="off"
+                    ref={goalInputRef}
+                    value={goalInput || formData.goal}
+                    onChange={e => {
+                      setGoalInput(e.target.value);
+                      setShowGoalDropdown(true);
+                      handleInputChange(e);
+                    }}
+                    onFocus={() => setShowGoalDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowGoalDropdown(false), 150)}
+                    placeholder="Type to search your goal..."
+                    className="w-full bg-gray-800 rounded-xl px-4 py-3 text-gray-100"
+                  />
+                  {showGoalDropdown && filteredGoals.length > 0 && (
+                    <ul className="absolute z-10 w-full bg-gray-900 border border-gray-700 rounded-xl mt-1 max-h-48 overflow-y-auto shadow-lg">
+                      {filteredGoals.map(option => (
+                        <li
+                          key={option}
+                          onMouseDown={() => {
+                            setFormData(prev => ({ ...prev, goal: option }));
+                            setGoalInput(option);
+                            setShowGoalDropdown(false);
+                          }}
+                          className={`px-4 py-2 cursor-pointer hover:bg-indigo-600 hover:text-white ${formData.goal === option ? 'bg-indigo-700 text-white' : 'text-gray-200'}`}
+                        >
+                          {option}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
                 {formData.goal && (
                   <div className="mt-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700">
                     <div className="text-sm text-gray-400">
