@@ -5,8 +5,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 from datetime import datetime, timedelta
 from sqlalchemy import func
-from .recommendations import get_next_steps, get_learning_insights
-from .ai_learning_path import AILearningPathGenerator
 
 main = Blueprint('main', __name__)
 
@@ -17,6 +15,10 @@ def get_closest_goal(user_input, available_goals):
     return match if score > 65 else None
 
 def generate_learning_path(goal, user_preferences=None):
+    """
+    Generate a learning path based on templates and basic user preferences.
+    No AI involvement - purely rule-based customization.
+    """
     all_goals = list(learning_path_templates.keys())
     matched_goal = get_closest_goal(goal, all_goals)
     
@@ -27,20 +29,38 @@ def generate_learning_path(goal, user_preferences=None):
     
     # If we have user preferences, customize the path
     if user_preferences:
-        # Adjust content based on difficulty preference
-        if user_preferences.difficulty_preference == "beginner":
-            for step in base_path:
-                step["duration"] = str(int(step["duration"].split()[0]) * 1.5) + " weeks"
-        elif user_preferences.difficulty_preference == "advanced":
-            for step in base_path:
-                step["duration"] = str(max(1, int(step["duration"].split()[0]) // 1.5)) + " weeks"
-                
-        # Add additional resources based on learning style
+        customized_path = []
         for step in base_path:
+            customized_step = step.copy()  # Create a copy to modify
+            
+            # Adjust duration based on difficulty preference
+            if user_preferences.difficulty_preference == "beginner":
+                if "duration" in customized_step:
+                    duration = customized_step["duration"].split()
+                    if len(duration) == 2:
+                        weeks = float(duration[0]) * 1.5
+                        customized_step["duration"] = f"{weeks} {duration[1]}"
+            elif user_preferences.difficulty_preference == "advanced":
+                if "duration" in customized_step:
+                    duration = customized_step["duration"].split()
+                    if len(duration) == 2:
+                        weeks = max(1, float(duration[0]) / 1.5)
+                        customized_step["duration"] = f"{weeks} {duration[1]}"
+
+            # Add resources based on learning style
+            if "resources" not in customized_step:
+                customized_step["resources"] = {}
+                
             if user_preferences.learning_style == "visual":
-                step["additional_resources"] = {"type": "video", "url": f"https://video-course.com/{step['title']}"}
+                customized_step["resources"]["recommended_type"] = "video"
+            elif user_preferences.learning_style == "reading":
+                customized_step["resources"]["recommended_type"] = "documentation"
             elif user_preferences.learning_style == "practical":
-                step["additional_resources"] = {"type": "project", "url": f"https://projects.com/{step['title']}"}
+                customized_step["resources"]["recommended_type"] = "practice"
+
+            customized_path.append(customized_step)
+        
+        return customized_path
                 
     return base_path
 
@@ -82,54 +102,86 @@ def login():
 @main.route('/submit-user-data', methods=['POST'])
 def submit_user_data():
     try:
-        data = request.get_json()
+        print("\n=== Processing user data submission ===")
+        data = request.json
+        
+        # Validate request data
         if not data:
+            print("No data received")
             return jsonify({"message": "No data provided"}), 400
-            
+
         user_id = data.get('user_id')
         if not user_id:
+            print("No user_id provided")
             return jsonify({"message": "User ID is required"}), 400
 
-        # Required fields
+        # Required fields validation
         required_fields = ['age', 'gender', 'goal']
         missing_fields = [field for field in required_fields if not data.get(field)]
         if missing_fields:
+            print(f"Missing required fields: {missing_fields}")
             return jsonify({
                 "message": "Missing required fields",
                 "fields": missing_fields
             }), 400
 
+        print(f"Processing data for user_id: {user_id}")
+        
+        # Get or create user
         user = User.query.get(user_id)
         if not user:
+            print(f"User {user_id} not found")
             return jsonify({"message": "User not found"}), 404
 
-        # Get or create user preferences
+        # Update user's basic information
+        user.age = data.get('age')
+        user.gender = data.get('gender')
+        user.education = data.get('education')
+        user.goal = data.get('goal')
+        print(f"Updated user basic info: age={user.age}, gender={user.gender}, goal={user.goal}")
+
+        # Update or create user preferences
         preferences = UserPreferences.query.filter_by(user_id=user_id).first()
         if not preferences:
+            print("Creating new user preferences")
             preferences = UserPreferences(user_id=user_id)
             db.session.add(preferences)
+
+        # Update preferences from form data
+        preference_fields = [
+            'learning_style', 'difficulty_preference', 'preferred_content_types',
+            'preferred_session_duration', 'available_hours_per_week',
+            'learning_environment', 'career_goals'
+        ]
         
-        # Update preferences with form data
-        if data.get('learning_style'):
-            preferences.learning_style = data['learning_style']
-        if data.get('difficulty_preference'):
-            preferences.difficulty_preference = data['difficulty_preference']
-        if data.get('daily_goal_minutes'):
-            preferences.daily_goal_minutes = data['daily_goal_minutes']
-        if data.get('preferred_content_types'):
-            preferences.content_preferences = json.dumps(data['preferred_content_types'])
-        
-        # Generate learning path with preferences
-        learning_path = generate_learning_path(data['goal'], preferences)
-        
-        # Update user data
-        user.age = data['age']
-        user.gender = data['gender']
-        user.education = data.get('education')
-        user.goal = data['goal']
+        for field in preference_fields:
+            if field in data:
+                value = data[field]
+                # Handle array fields
+                if field in ['preferred_content_types', 'career_goals']:
+                    value = json.dumps(value) if isinstance(value, list) else value
+                setattr(preferences, field, value)
+                print(f"Updated preference: {field} = {value}")
+
+        # Generate learning path based on goal and preferences
+        print(f"Generating learning path for goal: {data.get('goal')}")
+        learning_path = generate_learning_path(data.get('goal'), preferences)
+        if not learning_path:
+            print("Failed to generate learning path")
+            return jsonify({"message": "Could not generate learning path"}), 400
+
+        # Save the learning path
         user.learning_path = json.dumps(learning_path)
-        
-        # Initialize step progress for each step
+        print("Learning path generated and saved")
+
+        # Initialize or update step progress
+        existing_progress = StepProgress.query.filter_by(user_id=user_id).all()
+        if existing_progress:
+            print("Deleting existing progress")
+            for progress in existing_progress:
+                db.session.delete(progress)
+
+        print("Creating new step progress entries")
         for idx, _ in enumerate(learning_path):
             step_progress = StepProgress(
                 user_id=user_id,
@@ -137,17 +189,27 @@ def submit_user_data():
                 started_at=datetime.utcnow()
             )
             db.session.add(step_progress)
-        
-        # Initialize learning analytics
-        analytics = LearningAnalytics(
+
+        # Initialize or update analytics
+        analytics = LearningAnalytics.query.filter_by(
             user_id=user_id,
             date=datetime.utcnow().date()
-        )
-        db.session.add(analytics)
+        ).first()
         
+        if not analytics:
+            print("Creating new analytics entry")
+            analytics = LearningAnalytics(
+                user_id=user_id,
+                date=datetime.utcnow().date()
+            )
+            db.session.add(analytics)
+
         try:
+            print("Committing changes to database")
             db.session.commit()
+            print("Successfully committed all changes")
         except Exception as e:
+            print(f"Database error: {str(e)}")
             db.session.rollback()
             return jsonify({
                 "message": "Database error while saving user data",
@@ -158,8 +220,11 @@ def submit_user_data():
             "message": "User data submitted successfully",
             "learning_path": learning_path
         })
-        
+
     except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "message": "Server error while processing user data",
             "error": str(e)
@@ -522,92 +587,110 @@ def get_user_analytics(user_id):
         }
     })
 
-@main.route('/recommendations/<int:user_id>', methods=['GET'])
-def get_recommendations(user_id):
+@main.route('/get-progress/<int:user_id>', methods=['GET'])
+def get_user_progress(user_id):
     try:
-        # Initialize AI model
-        ai_generator = AILearningPathGenerator(user_id)
+        # Get user's progress
+        progress = StepProgress.query.filter_by(user_id=user_id).all()
         
-        # Get AI-generated recommendations
-        ai_recommendations = ai_generator.generate_adaptive_recommendations()
-        
-        # Get traditional next steps
-        next_steps = get_next_steps(user_id)
-        
-        # Get skill gap analysis
-        skill_gaps = ai_generator.generate_skill_gap_analysis()
-        
-        # Combine all recommendations
-        recommendations = []
-        
-        # Add AI-generated recommendations
-        for rec in ai_recommendations:
-            recommendations.append({
-                "type": "ai_recommendation",
-                "title": rec.get("title"),
-                "description": rec.get("description"),
-                "difficulty": rec.get("difficulty"),
-                "estimated_time": rec.get("estimated_time"),
-                "resource_url": rec.get("url"),
-                "reason": "Based on your learning patterns and preferences"
+        # Format progress data
+        progress_data = []
+        for p in progress:
+            progress_data.append({
+                'step_index': p.step_index,
+                'completed': p.completed,
+                'started_at': p.started_at.isoformat() if p.started_at else None,
+                'completed_at': p.completed_at.isoformat() if p.completed_at else None,
+                'time_spent': p.time_spent
             })
             
-        # Add next steps from current path
-        for step in next_steps:
-            recommendations.append({
-                "type": "current_path",
-                "step": step,
-                "reason": "Next step in your current learning path"
-            })
-            
-        # Add skill gap recommendations
-        if skill_gaps.get("skill_improvement_suggestions"):
-            for suggestion in skill_gaps["skill_improvement_suggestions"]:
-                recommendations.append({
-                    "type": "skill_gap",
-                    "title": f"Improve {suggestion['skill']}",
-                    "description": suggestion["reason"],
-                    "resources": suggestion["resources"],
-                    "reason": "Based on your career goals"
-                })
-        
         return jsonify({
-            "recommendations": recommendations[:5],  # Return top 5 recommendations
-            "skill_gaps": skill_gaps.get("missing_critical_skills", []),
-            "focus_areas": skill_gaps.get("recommended_focus_areas", [])
+            'user_id': user_id,
+            'progress': progress_data
         })
         
     except Exception as e:
-        print(f"Error generating recommendations: {str(e)}")
         return jsonify({
-            "recommendations": get_next_steps(user_id),  # Fallback to basic recommendations
-            "error": "Could not generate AI recommendations"
+            'message': 'Error fetching user progress',
+            'error': str(e)
+        }), 500
+
+@main.route('/dashboard-recommendations/<int:user_id>', methods=['GET'])
+def get_dashboard_recommendations(user_id):
+    try:
+        print(f"\n=== Getting dashboard recommendations for user {user_id} ===")
+        
+        # Get user and their learning path
+        user = User.query.get(user_id)
+        if not user:
+            print(f"User {user_id} not found")
+            return jsonify({"message": "User not found"}), 404
+
+        try:
+            learning_path = json.loads(user.learning_path or "[]")
+        except json.JSONDecodeError:
+            print("Error decoding learning path")
+            return jsonify({"message": "Invalid learning path data"}), 500
+
+        if not learning_path:
+            print("No learning path found")
+            return jsonify({"message": "No learning path available"}), 404
+
+        # Get user's progress
+        progress = StepProgress.query.filter_by(user_id=user_id).all()
+        completed_steps = {p.step_index for p in progress if p.completed}
+        
+        # Find incomplete steps (excluding the first step)
+        incomplete_steps = []
+        for idx, step in enumerate(learning_path[1:], start=1):  # Start from index 1
+            if idx not in completed_steps:
+                step_data = step.copy()
+                step_data['step_index'] = idx
+                incomplete_steps.append(step_data)
+
+        # Get 2-3 random recommendations from incomplete steps
+        import random
+        num_recommendations = min(random.randint(2, 3), len(incomplete_steps))
+        recommendations = random.sample(incomplete_steps, num_recommendations) if incomplete_steps else []
+
+        # Add contextual information to each recommendation
+        enriched_recommendations = []
+        for rec in recommendations:
+            # Get the prerequisites for this step
+            prerequisites = rec.get('prerequisites', [])
+            prereq_completed = all(
+                prereq in completed_steps 
+                for idx, step in enumerate(learning_path) 
+                for prereq in step.get('prerequisites', [])
+                if idx in completed_steps
+            )
+
+            enriched_rec = {
+                'step': rec,
+                'type': 'next_step',
+                'ready_to_start': prereq_completed,
+                'estimated_time': rec.get('duration', 'unknown'),
+                'context': {
+                    'position': f"Step {rec['step_index'] + 1} of {len(learning_path)}",
+                    'prerequisites_met': prereq_completed,
+                    'skills_to_gain': rec.get('skills_gained', [])
+                }
+            }
+            enriched_recommendations.append(enriched_rec)
+
+        print(f"Generated {len(enriched_recommendations)} recommendations")
+        
+        return jsonify({
+            'recommendations': enriched_recommendations,
+            'total_steps': len(learning_path),
+            'completed_steps': len(completed_steps)
         })
 
-@main.route('/insights/<int:user_id>', methods=['GET'])
-def get_user_insights(user_id):
-    try:
-        # Get basic insights
-        basic_insights = get_learning_insights(user_id)
-        
-        # Initialize AI model
-        ai_generator = AILearningPathGenerator(user_id)
-        
-        # Get skill gap analysis
-        skill_analysis = ai_generator.generate_skill_gap_analysis()
-        
-        # Combine insights
-        insights = {
-            **basic_insights,  # Include basic insights
-            "skill_gaps": {
-                "missing_skills": skill_analysis.get("missing_critical_skills", []),
-                "focus_areas": skill_analysis.get("recommended_focus_areas", [])
-            },
-            "improvement_suggestions": skill_analysis.get("skill_improvement_suggestions", [])
-        }
-        
-        return jsonify(insights)
-        
     except Exception as e:
-        print(f"Error generating insights: {str(e)}")
-        return jsonify(get_learning_insights(user_id))  # Fallback to basic insights
+        print(f"Error generating recommendations: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "message": "Error generating recommendations",
+            "error": str(e)
+        }), 500
