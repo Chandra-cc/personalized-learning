@@ -47,7 +47,6 @@ const UserDetailsModal = memo(({ isOpen, onClose, userData }) => {
     );
   };
 
-  // Flatten preferences for easier access
   const prefs = userData.preferences || {};
 
   return (
@@ -56,146 +55,86 @@ const UserDetailsModal = memo(({ isOpen, onClose, userData }) => {
       onClick={onClose}
     >
       <div
-        className="bg-gray-900 text-gray-100 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-lg"
+        className="bg-gray-900 text-gray-100 rounded-2xl p-8 max-w-4xl w-full border border-gray-700 shadow-2xl relative"
         onClick={e => e.stopPropagation()}
+        style={{ maxHeight: '90vh', overflow: 'visible' }}
       >
-        <div className="flex items-center gap-4 mb-6">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200 text-2xl font-bold focus:outline-none"
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <div className="flex items-center gap-4 mb-8">
           <div className="p-3 bg-gray-800 rounded-xl">
             <FaUserCircle className="text-4xl text-gray-200" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-100">Profile Details</h2>
-            <p className="text-gray-300">{userData.email}</p>
+            <h2 className="text-3xl font-bold text-gray-100">User Profile</h2>
+            <p className="text-gray-300 text-lg">{userData.email}</p>
           </div>
         </div>
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Learning Goal</p>
-              <p className="font-medium text-gray-100">{userData.goal || "Not set"}</p>
+        <div className="space-y-10 overflow-y-auto" style={{ maxHeight: '65vh', paddingRight: '0.5rem' }}>
+          {/* Personal Info */}
+          <section>
+            <h3 className="text-xl font-semibold text-indigo-400 mb-4 flex items-center gap-2"><FaUserCircle /> Personal Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ProfileCard label="Age" value={userData.age} />
+              <ProfileCard label="Gender" value={userData.gender} />
+              <ProfileCard label="Education" value={userData.education} />
+              <ProfileCard label="Education Level" value={userData.education_level} />
             </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Difficulty Preference</p>
-              <p className="font-medium text-gray-100">{prefs.difficulty_preference || "Not set"}</p>
+          </section>
+          {/* Professional Info */}
+          <section>
+            <h3 className="text-xl font-semibold text-blue-400 mb-4 flex items-center gap-2"><FaChartLine /> Professional Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ProfileCard label="Current Role" value={userData.current_role} />
+              <ProfileCard label="Years of Experience" value={userData.years_of_experience || prefs.years_of_experience} />
+              <ProfileCard label="Industry" value={userData.industry} />
+              <ProfileCard label="Certifications" value={renderArray(userData.certifications)} />
+              <ProfileCard label="Career Goals" value={renderArray(userData.career_goals || prefs.career_goals)} />
+              <ProfileCard label="Skills Self-Assessment" value={userData.skills_self_assessment && Object.keys(userData.skills_self_assessment).length > 0 ? renderObject(userData.skills_self_assessment) : "Not set"} />
             </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Age</p>
-              <p className="font-medium text-gray-100">{userData.age || "Not set"}</p>
+          </section>
+          {/* Learning Preferences */}
+          <section>
+            <h3 className="text-xl font-semibold text-green-400 mb-4 flex items-center gap-2"><FaBook /> Learning Preferences</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ProfileCard label="Learning Goal" value={userData.goal} />
+              <ProfileCard label="Difficulty Preference" value={prefs.difficulty_preference} />
+              <ProfileCard label="Learning Style" value={prefs.learning_style} />
+              <ProfileCard label="Preferred Content Types" value={renderArray(prefs.preferred_content_types)} />
+              <ProfileCard label="Session Duration (min)" value={prefs.preferred_session_duration} />
+              <ProfileCard label="Learning Environment" value={prefs.learning_environment} />
+              <ProfileCard label="Available Hours/Week" value={prefs.available_hours_per_week} />
+              <ProfileCard label="Preferred Learning Time" value={prefs.preferred_learning_time} />
+              <ProfileCard label="Daily Goal (min)" value={prefs.daily_goal_minutes} />
+              <ProfileCard label="Preferred Deadline" value={userData.preferred_deadline} />
+              <ProfileCard label="Preferred Teaching Styles" value={renderArray(userData.preferred_teaching_styles)} />
             </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Gender</p>
-              <p className="font-medium text-gray-100">{userData.gender || "Not set"}</p>
+          </section>
+          {/* Technical Context */}
+          <section>
+            <h3 className="text-xl font-semibold text-cyan-400 mb-4 flex items-center gap-2"><FaBrain /> Technical Context</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ProfileCard label="Preferred Tools" value={renderArray(userData.preferred_tools)} />
+              <ProfileCard label="Device Constraints" value={userData.device_constraints && Object.keys(userData.device_constraints).length > 0 ? renderObject(userData.device_constraints) : "Not set"} />
+              <ProfileCard label="Accessibility Needs" value={renderArray(userData.accessibility_needs)} />
+              <ProfileCard label="Collaboration Preference" value={userData.collaboration_preference} />
+              <ProfileCard label="Mentorship Interest" value={userData.mentorship_interest ? "Yes" : "No"} />
             </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Education</p>
-              <p className="font-medium text-gray-100">{userData.education || "Not set"}</p>
+          </section>
+          {/* Motivation & Interests */}
+          <section>
+            <h3 className="text-xl font-semibold text-pink-400 mb-4 flex items-center gap-2"><FaFire /> Motivation & Interests</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ProfileCard label="Motivation Factors" value={renderArray(userData.motivation_factors)} />
+              <ProfileCard label="Interests" value={renderArray(userData.interests)} />
             </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Current Role</p>
-              <p className="font-medium text-gray-100">{userData.current_role || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Years of Experience</p>
-              <p className="font-medium text-gray-100">{userData.years_of_experience || prefs.years_of_experience || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Industry</p>
-              <p className="font-medium text-gray-100">{userData.industry || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Career Goals</p>
-              <p className="font-medium text-gray-100">{renderArray(userData.career_goals || prefs.career_goals)}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Learning Style</p>
-              <p className="font-medium text-gray-100">{prefs.learning_style || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Preferred Content Types</p>
-              <p className="font-medium text-gray-100">{renderArray(prefs.preferred_content_types)}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Session Duration (min)</p>
-              <p className="font-medium text-gray-100">{prefs.preferred_session_duration || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Learning Environment</p>
-              <p className="font-medium text-gray-100">{prefs.learning_environment || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Available Hours/Week</p>
-              <p className="font-medium text-gray-100">{prefs.available_hours_per_week || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Preferred Learning Time</p>
-              <p className="font-medium text-gray-100">{prefs.preferred_learning_time || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Daily Goal (min)</p>
-              <p className="font-medium text-gray-100">{prefs.daily_goal_minutes || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Preferred Deadline</p>
-              <p className="font-medium text-gray-100">{userData.preferred_deadline || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Education Level</p>
-              <p className="font-medium text-gray-100">{userData.education_level || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Certifications</p>
-              <p className="font-medium text-gray-100">{renderArray(userData.certifications)}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Skills Self-Assessment</p>
-              {userData.skills_self_assessment && Object.keys(userData.skills_self_assessment).length > 0
-                ? renderObject(userData.skills_self_assessment)
-                : "Not set"}
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Collaboration Preference</p>
-              <p className="font-medium text-gray-100">{userData.collaboration_preference || "Not set"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Mentorship Interest</p>
-              <p className="font-medium text-gray-100">{userData.mentorship_interest ? "Yes" : "No"}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Preferred Teaching Styles</p>
-              <p className="font-medium text-gray-100">{renderArray(userData.preferred_teaching_styles)}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Preferred Tools</p>
-              <p className="font-medium text-gray-100">{renderArray(userData.preferred_tools)}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Device Constraints</p>
-              {userData.device_constraints && Object.keys(userData.device_constraints).length > 0
-                ? renderObject(userData.device_constraints)
-                : "Not set"}
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Accessibility Needs</p>
-              <p className="font-medium text-gray-100">{renderArray(userData.accessibility_needs)}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Motivation Factors</p>
-              <p className="font-medium text-gray-100">{renderArray(userData.motivation_factors)}</p>
-            </div>
-            <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-              <p className="text-sm text-gray-300 mb-1">Interests</p>
-              <p className="font-medium text-gray-100">{renderArray(userData.interests)}</p>
-            </div>
-          </div>
+          </section>
         </div>
-        <button
-          onClick={onClose}
-          className="mt-6 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 \
-                     px-4 py-3 rounded-xl text-gray-100 w-full font-medium transition-all duration-300 \
-                     transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]"
-        >
-          Close
-        </button>
       </div>
     </div>
   );
@@ -212,6 +151,14 @@ UserDetailsModal.propTypes = {
     education: PropTypes.string,
   }).isRequired,
 };
+
+// ProfileCard helper component
+const ProfileCard = ({ label, value }) => (
+  <div className="p-4 bg-gray-800 rounded-xl border border-gray-700 h-full min-h-[70px] flex flex-col justify-between">
+    <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wide">{label}</p>
+    <div className="text-base text-gray-100 break-words">{value || "Not set"}</div>
+  </div>
+);
 
 // Memoized Step Card Component
 const LearningStepCard = memo(({ step, index, isCompleted, updatingStep, onComplete, analytics }) => {
