@@ -685,62 +685,189 @@ def get_dashboard_recommendations(user_id):
             print(f"User {user_id} not found")
             return jsonify({"message": "User not found"}), 404
 
+        # Get user preferences
+        preferences = UserPreferences.query.filter_by(user_id=user_id).first()
+        print(f"User preferences found: {bool(preferences)}")
+
         try:
             learning_path = json.loads(user.learning_path or "[]")
-        except json.JSONDecodeError:
-            print("Error decoding learning path")
-            return jsonify({"message": "Invalid learning path data"}), 500
+            print(f"Learning path type: {type(learning_path)}")
+            print(f"Learning path content: {learning_path[:2]}")  # Print first two items for debugging
+            
+            if preferences:
+                prefs_dict = {
+                    'difficulty_preference': preferences.difficulty_preference or '3',
+                    'career_goals': json.loads(preferences.career_goals) if preferences.career_goals else []
+                }
+                print(f"User preferences: {prefs_dict}")
+            else:
+                prefs_dict = {'difficulty_preference': '3', 'career_goals': []}
+                print("Using default preferences")
+        except json.JSONDecodeError as e:
+            print(f"Error decoding data: {str(e)}")
+            return jsonify({"message": "Invalid user data"}), 500
 
         if not learning_path:
             print("No learning path found")
             return jsonify({"message": "No learning path available"}), 404
 
-        # Get user's progress
+        # Get user's progress and analytics
         progress = StepProgress.query.filter_by(user_id=user_id).all()
-        completed_steps = {p.step_index for p in progress if p.completed}
+        print(f"Total progress entries: {len(progress)}")
         
-        # Find incomplete steps (excluding the first step)
-        incomplete_steps = []
-        for idx, step in enumerate(learning_path[1:], start=1):  # Start from index 1
+        # Fix: Check completed_at instead of completed
+        completed_steps = {p.step_index: p for p in progress if p.completed_at is not None}
+        print(f"Completed step indices: {list(completed_steps.keys())}")
+        
+        print(f"Found {len(completed_steps)} completed steps")
+        print(f"Total steps in learning path: {len(learning_path)}")
+        
+        # Calculate user's learning patterns
+        avg_completion_time = sum(p.time_spent or 0 for p in progress if p.completed_at is not None) / len(completed_steps) if completed_steps else 0
+        avg_comprehension = sum(p.comprehension_score or 0 for p in progress if p.completed_at is not None) / len(completed_steps) if completed_steps else 0
+        
+        recommendations = []
+        
+        # 1. Next Steps (Immediate next steps in the learning path)
+        next_steps = []
+        print("\nProcessing next steps:")
+        for idx, step in enumerate(learning_path):
             if idx not in completed_steps:
-                step_data = step.copy()
-                step_data['step_index'] = idx
-                incomplete_steps.append(step_data)
+                print(f"Checking step {idx}")
+                prerequisites = step.get('prerequisites', [])
+                print(f"Prerequisites for step {idx}: {prerequisites}")
+                
+                # Fix: Check prerequisites by title match
+                prereq_completed = True  # Default to True for steps with no prerequisites
+                if prerequisites:
+                    for prereq in prerequisites:
+                        prereq_found = False
+                        for completed_idx, completed_step in completed_steps.items():
+                            if completed_idx < len(learning_path):
+                                if learning_path[completed_idx].get('title') == prereq:
+                                    prereq_found = True
+                                    break
+                        if not prereq_found:
+                            prereq_completed = False
+                            break
+                
+                print(f"Prerequisites completed: {prereq_completed}")
+                
+                if prereq_completed:
+                    try:
+                        step_difficulty = int(float(step.get('difficulty', 3)))
+                        pref_difficulty = int(float(prefs_dict['difficulty_preference']))
+                        difficulty_match = abs(step_difficulty - pref_difficulty) <= 1
+                    except (ValueError, TypeError):
+                        difficulty_match = True
+                    
+                    next_step = {
+                        'type': 'next_step',
+                        'step': step,
+                        'step_index': idx,
+                        'priority': 'high' if difficulty_match else 'medium',
+                        'context': {
+                            'estimated_time': step.get('duration', 'Not specified'),
+                            'difficulty': step.get('difficulty', 3),
+                            'skills_to_gain': step.get('skills_gained', []),
+                            'prerequisites_met': True,
+                            'difficulty_match': difficulty_match
+                        }
+                    }
+                    next_steps.append(next_step)
+                    print(f"Added next step: {step.get('title', 'Untitled')}")
+                    
+                    if len(next_steps) >= 2:
+                        break
 
-        # Get 2-3 random recommendations from incomplete steps
-        import random
-        num_recommendations = min(random.randint(2, 3), len(incomplete_steps))
-        recommendations = random.sample(incomplete_steps, num_recommendations) if incomplete_steps else []
-
-        # Add contextual information to each recommendation
-        enriched_recommendations = []
-        for rec in recommendations:
-            # Get the prerequisites for this step
-            prerequisites = rec.get('prerequisites', [])
-            prereq_completed = all(
-                prereq in completed_steps 
-                for idx, step in enumerate(learning_path) 
-                for prereq in step.get('prerequisites', [])
-                if idx in completed_steps
-            )
-
-            enriched_rec = {
-                'step': rec,
-                'type': 'next_step',
-                'ready_to_start': prereq_completed,
-                'estimated_time': rec.get('duration', 'unknown'),
-                'context': {
-                    'position': f"Step {rec['step_index'] + 1} of {len(learning_path)}",
-                    'prerequisites_met': prereq_completed,
-                    'skills_to_gain': rec.get('skills_gained', [])
-                }
-            }
-            enriched_recommendations.append(enriched_rec)
-
-        print(f"Generated {len(enriched_recommendations)} recommendations")
+        print(f"\nGenerated {len(next_steps)} next step recommendations")
+        recommendations.extend(next_steps)
         
+        # 2. Review Suggestions (Based on low comprehension scores)
+        review_suggestions = []
+        print("\nProcessing review suggestions:")
+        for step_idx, progress_data in completed_steps.items():
+            if step_idx < len(learning_path):  # Ensure step exists in learning path
+                print(f"Checking step {step_idx} for review")
+                if progress_data.comprehension_score and progress_data.comprehension_score < 70:
+                    print(f"Found low comprehension score: {progress_data.comprehension_score}")
+                    step = learning_path[step_idx]
+                    # Only add to review if not already in progress
+                    if not any(r.get('step_index') == step_idx for r in review_suggestions):
+                        review_suggestions.append({
+                            'type': 'review',
+                            'step': step,
+                            'step_index': step_idx,
+                            'priority': 'high' if progress_data.comprehension_score < 50 else 'medium',
+                            'context': {
+                                'previous_score': progress_data.comprehension_score,
+                                'completed_at': progress_data.completed_at.strftime('%Y-%m-%d'),
+                                'reason': f"Previous comprehension score was {progress_data.comprehension_score}%"
+                            }
+                        })
+                        print(f"Added review suggestion for: {step.get('title', 'Untitled')}")
+        
+        if review_suggestions:
+            print(f"Found {len(review_suggestions)} review suggestions")
+            # Sort by comprehension score (lowest first) and add to recommendations
+            review_suggestions.sort(key=lambda x: x['context']['previous_score'])
+            recommendations.extend(review_suggestions)  # Add all review suggestions
+
+        # 3. Skill Boosters (Based on user's career goals and skill gaps)
+        career_goals = prefs_dict.get('career_goals', [])
+        print(f"\nProcessing skill boosters for career goals: {career_goals}")
+        if career_goals:
+            skill_boosters = []
+            for idx, step in enumerate(learning_path):
+                if idx not in completed_steps:
+                    step_skills = set(step.get('skills_gained', []))
+                    print(f"\nChecking step {idx} skills: {step_skills}")
+                    goal_relevance = any(
+                        goal.lower() in step.get('description', '').lower() or 
+                        goal.lower() in step.get('title', '').lower() or
+                        any(goal.lower() in skill.lower() for skill in step_skills)
+                        for goal in career_goals
+                    )
+                    print(f"Goal relevance: {goal_relevance}")
+                    
+                    if goal_relevance:
+                        aligned_goals = [goal for goal in career_goals if 
+                                      goal.lower() in step.get('description', '').lower() or
+                                      goal.lower() in step.get('title', '').lower() or
+                                      any(goal.lower() in skill.lower() for skill in step_skills)]
+                        print(f"Aligned goals: {aligned_goals}")
+                        
+                        skill_boosters.append({
+                            'type': 'skill_booster',
+                            'step': step,
+                            'step_index': idx,
+                            'priority': 'high',
+                            'context': {
+                                'aligned_goals': aligned_goals,
+                                'skills_to_gain': list(step_skills),
+                                'career_impact': 'Direct alignment with your career goals'
+                            }
+                        })
+                        print(f"Added skill booster: {step.get('title', 'Untitled')}")
+            
+            if skill_boosters:
+                print(f"Found {len(skill_boosters)} skill boosters")
+                recommendations.append(skill_boosters[0])
+
+        # Add learning pattern insights
+        learning_insights = {
+            'avg_completion_time': avg_completion_time,
+            'avg_comprehension': avg_comprehension,
+            'completed_steps_count': len(completed_steps),
+            'total_steps': len(learning_path),
+            'pace_suggestion': 'on_track' if avg_completion_time <= 60 else 'needs_focus'
+        }
+
+        print(f"\nSending {len(recommendations)} total recommendations")
+        print("Recommendation types:", [rec['type'] for rec in recommendations])
         return jsonify({
-            'recommendations': enriched_recommendations,
+            'recommendations': recommendations,
+            'learning_insights': learning_insights,
             'total_steps': len(learning_path),
             'completed_steps': len(completed_steps)
         })

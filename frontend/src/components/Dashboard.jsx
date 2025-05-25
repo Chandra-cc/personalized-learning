@@ -13,6 +13,11 @@ import {
   FaChevronUp,
   FaFire,
   FaBrain,
+  FaChevronRight,
+  FaSync,
+  FaRocket,
+  FaStar,
+  FaCode,
 } from "react-icons/fa";
 
 // Memoized Modal Component
@@ -480,7 +485,7 @@ const Dashboard = ({ userId, onLogout }) => {
             console.warn('Failed to fetch analytics:', err);
             return { data: null };
           }),
-          axios.get(`http://localhost:5000/recommendations/${userId}`).catch(err => {
+          axios.get(`http://localhost:5000/dashboard-recommendations/${userId}`).catch(err => {
             console.warn('Failed to fetch recommendations:', err);
             return { data: { recommendations: [] } };
           }),
@@ -496,7 +501,13 @@ const Dashboard = ({ userId, onLogout }) => {
         console.log('Insights API Response:', insightsRes.data);
         
         setUserData(userRes.data);
-        setRecommendations(recommendationsRes.data.recommendations || []);
+        if (recommendationsRes.data && recommendationsRes.data.recommendations) {
+          console.log('Setting recommendations:', recommendationsRes.data.recommendations);
+          setRecommendations(recommendationsRes.data.recommendations);
+        } else {
+          console.warn('No recommendations data found in response');
+          setRecommendations([]);
+        }
         setInsights(insightsRes.data);
         
         // Initialize progress state from API response
@@ -745,6 +756,86 @@ const Dashboard = ({ userId, onLogout }) => {
                 </div>
               </div>
             </div>
+
+            {/* Skills Overview */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <FaCode className="text-gray-200" />
+                <p className="font-medium text-gray-100">Skills Acquired</p>
+              </div>
+              
+              {/* Calculate and display skills */}
+              {(() => {
+                const completedSkills = new Map(); // Using Map to track skill levels
+                
+                // Get skills from completed steps
+                Object.entries(progress).forEach(([stepIndex, stepProgress]) => {
+                  if (stepProgress === true || (typeof stepProgress === 'object' && stepProgress.completed === true)) {
+                    const step = steps[parseInt(stepIndex)];
+                    if (step && step.skills_gained) {
+                      step.skills_gained.forEach(skill => {
+                        // Update skill level based on comprehension score
+                        const comprehensionScore = typeof stepProgress === 'object' ? stepProgress.comprehension_score || 0 : 0;
+                        const currentLevel = completedSkills.get(skill) || 0;
+                        // Calculate new level based on comprehension (starting from 30%)
+                        let levelIncrement;
+                        if (comprehensionScore >= 70) {
+                          levelIncrement = 5; // 5 stars for 70%+
+                        } else if (comprehensionScore >= 50) {
+                          levelIncrement = 4; // 4 stars for 50-69%
+                        } else if (comprehensionScore >= 30) {
+                          levelIncrement = 3; // 3 stars for 30-49%
+                        } else {
+                          levelIncrement = 2; // 2 stars for completing
+                        }
+                        completedSkills.set(skill, levelIncrement); // Set directly to the earned level
+                      });
+                    }
+                  }
+                });
+
+                return completedSkills.size > 0 ? (
+                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {Array.from(completedSkills.entries())
+                      .sort(([, levelA], [, levelB]) => levelB - levelA) // Sort by level
+                      .map(([skill, level]) => {
+                        const roundedLevel = Math.floor(level);
+                        const progressPercent = (level / 5) * 100;
+                        
+                        return (
+                          <div key={skill} className="p-3 bg-gray-800 rounded-xl border border-gray-700">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-gray-200 font-medium">{skill}</span>
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <FaStar
+                                    key={i}
+                                    className={`w-3 h-3 ${
+                                      i < roundedLevel ? 'text-yellow-500' : 'text-gray-600'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <div className="relative h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                              <div
+                                className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-300"
+                                style={{ width: `${progressPercent}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <div className="text-center p-4 bg-gray-800 rounded-xl border border-gray-700">
+                    <p className="text-gray-400 text-sm">
+                      Complete steps to gain skills
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
           </nav>
 
           {/* Learning Insights */}
@@ -843,53 +934,165 @@ const Dashboard = ({ userId, onLogout }) => {
         <div className="flex-1 overflow-y-auto p-10">
           {/* Recommendations Section */}
           <div className="mb-10">
-            <h2 className="text-2xl font-bold text-gray-100 mb-6">Recommended Next Steps</h2>
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">Personalized Recommendations</h2>
             {recommendations.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {recommendations.map((rec, index) => (
-                <div
-                  key={index}
-                    className="p-6 bg-gray-900 rounded-2xl border border-gray-700 
-                              shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
-                              hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
-                              transition-all duration-300"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-gray-800 rounded-xl">
-                        {rec.type === "current_path" ? (
-                          <FaBook className="text-xl text-gray-200" />
-                        ) : (
-                          <FaChartLine className="text-xl text-gray-200" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-100">
-                          {rec.type === "current_path" ? rec.step.title : rec.path_name}
-                        </h3>
-                        <p className="text-sm text-gray-400">{rec.reason}</p>
-                      </div>
-                    </div>
-                    {rec.type === "current_path" ? (
-                      <div>
-                        <p className="text-gray-300 mb-3">{rec.step.description}</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <FaClock />
-                          <span>{rec.step.duration}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-gray-300 mb-3">Explore this new learning path based on your interests and performance.</p>
-                        {rec.first_step && (
-                          <div className="mt-2 p-3 bg-gray-800 rounded-lg">
-                            <p className="text-sm font-medium text-gray-200">First Step:</p>
-                            <p className="text-sm text-gray-400">{rec.first_step.title}</p>
+              <div className="space-y-6">
+                {/* Group recommendations by type */}
+                {recommendations.filter(rec => rec.type === 'next_step').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                      <FaChevronRight className="text-gray-400" />
+                      Next Steps
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {recommendations
+                        .filter(rec => rec.type === 'next_step')
+                        .map((rec, index) => (
+                          <div
+                            key={index}
+                            className={`p-6 bg-gray-900 rounded-2xl border 
+                                      ${rec.priority === 'high' ? 'border-indigo-500/30' : 'border-gray-700'}
+                                      shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
+                                      hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
+                                      transition-all duration-300`}
+                          >
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className={`p-2 rounded-xl ${rec.priority === 'high' ? 'bg-indigo-500/20' : 'bg-gray-800'}`}>
+                                <FaBook className={`text-xl ${rec.priority === 'high' ? 'text-indigo-400' : 'text-gray-200'}`} />
+                              </div>
+                              <div>
+                                <h3 className="font-medium text-gray-100">{rec.step.title}</h3>
+                                <p className="text-sm text-gray-400">Step {rec.step_index + 1}</p>
+                              </div>
+                            </div>
+                            <p className="text-gray-300 mb-4">{rec.step.description}</p>
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 text-sm text-gray-400">
+                                <FaClock />
+                                <span>{rec.context.estimated_time}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-gray-400">
+                                <FaChartLine />
+                                <span>Difficulty: {rec.context.difficulty}/5</span>
+                                {rec.context.difficulty_match && (
+                                  <span className="ml-2 px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
+                                    Matches your level
+                                  </span>
+                                )}
+                              </div>
+                              {rec.context.skills_to_gain.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                  {rec.context.skills_to_gain.map((skill, i) => (
+                                    <span key={i} className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300">
+                                      {skill}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    )}
+                        ))}
+                    </div>
                   </div>
-                ))}
+                )}
+
+                {/* Review Suggestions */}
+                {recommendations.filter(rec => rec.type === 'review').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                      <FaSync className="text-gray-400" />
+                      Suggested Reviews
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {recommendations
+                        .filter(rec => rec.type === 'review')
+                        .map((rec, index) => (
+                          <div
+                            key={index}
+                            className="p-6 bg-gray-900 rounded-2xl border border-yellow-500/30
+                                      shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
+                                      hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
+                                      transition-all duration-300"
+                          >
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-yellow-500/20 rounded-xl">
+                                <FaSync className="text-xl text-yellow-400" />
+                              </div>
+                              <div>
+                                <h3 className="font-medium text-gray-100">{rec.step.title}</h3>
+                                <p className="text-sm text-gray-400">Completed on {rec.context.completed_at}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 text-sm text-gray-400">
+                                <FaChartLine />
+                                <span>Previous Score: {Math.round(rec.context.previous_score)}%</span>
+                              </div>
+                              <p className="text-gray-300">{rec.context.reason}</p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Skill Boosters */}
+                {recommendations.filter(rec => rec.type === 'skill_booster').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                      <FaRocket className="text-gray-400" />
+                      Skill Boosters
+                    </h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {recommendations
+                        .filter(rec => rec.type === 'skill_booster')
+                        .map((rec, index) => (
+                          <div
+                            key={index}
+                            className="p-6 bg-gray-900 rounded-2xl border border-purple-500/30
+                                      shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
+                                      hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
+                                      transition-all duration-300"
+                          >
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-purple-500/20 rounded-xl">
+                                <FaRocket className="text-xl text-purple-400" />
+                              </div>
+                              <div>
+                                <h3 className="font-medium text-gray-100">{rec.step.title}</h3>
+                                <p className="text-sm text-gray-400">Career Goal Alignment</p>
+                              </div>
+                            </div>
+                            <p className="text-gray-300 mb-3">{rec.context.career_impact}</p>
+                            {rec.context.aligned_goals.length > 0 && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-400">Aligned with your goals:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {rec.context.aligned_goals.map((goal, i) => (
+                                    <span key={i} className="px-2 py-1 bg-purple-500/20 rounded-full text-xs text-purple-300">
+                                      {goal}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {rec.context.skills_to_gain.length > 0 && (
+                              <div className="mt-3">
+                                <p className="text-sm text-gray-400 mb-2">Skills you'll gain:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {rec.context.skills_to_gain.map((skill, i) => (
+                                    <span key={i} className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300">
+                                      {skill}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="p-6 bg-gray-900 rounded-2xl border border-gray-700 text-center">
@@ -948,3 +1151,26 @@ Dashboard.propTypes = {
 };
 
 export default memo(Dashboard);
+
+<style>
+{`
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.5);
+  border-radius: 20px;
+  border: transparent;
+}
+`}
+</style>
