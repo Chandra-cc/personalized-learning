@@ -15,349 +15,231 @@
       --text-primary: #E5E7EB;       /* Light gray for primary text */
       --text-secondary: #9CA3AF;     /* Medium gray for secondary text */
       --border-color: #374151;       /* Border color */
-      --gradient-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      --card-shadow: 0 0 15px 3px rgba(255,255,255,0.05);
-      --card-hover-shadow: 0 0 25px 5px rgba(255,255,255,0.1);
     }
 
     html, body {
-      width: 100%;
-      height: 100%;
       margin: 0;
       padding: 0;
-      overflow: hidden;
+      height: 100%;
       background-color: var(--primary-color);
     }
 
     .reveal {
       font-family: 'Open Sans', sans-serif;
-      font-size: 28px;
+      font-size: 24px;
       color: var(--text-primary);
-      height: 100vh;
-    }
-
-    .reveal .slides {
-      height: 100%;
-      text-align: center;
-    }
-
-    .reveal .slides section {
-      text-align: left;
-      height: 100vh;
-      padding: 40px 80px;
-      display: flex !important;
-      flex-direction: column;
-      justify-content: center;
       background-color: var(--primary-color);
     }
 
+    .reveal .slides {
+      background-color: var(--primary-color);
+    }
+
+    .reveal .slides section {
+      background: none !important;
+      padding: 20px;
+      height: 90vh !important;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center !important;
+      align-items: center !important;
+      transform: none !important;
+    }
+
+    .reveal .slides section > * {
+      margin-top: 0 !important;
+      margin-bottom: 20px;
+    }
+
+    .reveal .slides section > *:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Override any reveal.js background */
+    .reveal,
+    .reveal .slides,
+    .reveal .slides section,
+    .reveal .slides section:not([data-background]) {
+      background: none !important;
+    }
+
+    .reveal .backgrounds {
+      background-color: var(--primary-color) !important;
+    }
+
+    /* Content container for proper width */
+    .content-container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     /* Title Slide */
-    .reveal .slides section.title-slide {
+    .title-slide {
       text-align: center;
-      background: var(--gradient-bg);
-      padding: 0;
+      width: 100%;
     }
 
     .title-slide h1 {
-      font-size: 3.5em;
-      margin-bottom: 0.3em;
-      font-weight: 700;
-      background: linear-gradient(to right, #E5E7EB, #9CA3AF);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      line-height: 1.2;
+      font-size: 2.5em;
+      color: var(--text-primary);
+      margin-bottom: 0.5em;
+      width: 100%;
     }
 
     .title-slide h2 {
-      font-size: 1.8em;
+      font-size: 1.5em;
       color: var(--text-secondary);
-      max-width: 800px;
-      margin: 0 auto;
-      line-height: 1.4;
-    }
-
-    /* Content Layout */
-    .content-wrapper {
-      max-width: 1400px;
-      margin: 0 auto;
       width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
     }
 
-    /* Headings */
-    .reveal h1 {
+    /* Content Styles */
+    .reveal h1, .reveal h2, .reveal h3 {
       font-family: 'Montserrat', sans-serif;
-      font-size: 2.8em;
-      font-weight: 700;
       color: var(--text-primary);
       margin-bottom: 0.5em;
-      line-height: 1.2;
+      width: 100%;
+      text-align: left;
     }
 
     .reveal h2 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 2.2em;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.8em;
-      line-height: 1.3;
+      font-size: 2em;
     }
 
     .reveal h3 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 1.8em;
-      font-weight: 600;
+      font-size: 1.5em;
       color: var(--accent-color);
-      margin-bottom: 0.6em;
-      line-height: 1.3;
     }
 
-    /* Lists */
     .reveal ul {
       list-style-type: none;
-      margin: 0 0 1.5em 0;
+      margin: 0 0 1em 0;
       padding: 0;
+      width: 100%;
+      text-align: left;
     }
 
     .reveal ul li {
       margin: 0.5em 0;
       padding-left: 1.5em;
       position: relative;
-      font-size: 1.2em;
-      line-height: 1.5;
       color: var(--text-secondary);
     }
 
     .reveal ul li:before {
       content: "•";
       color: var(--accent-color);
-      font-weight: bold;
       position: absolute;
       left: 0;
     }
 
-    /* Feature Cards */
-    .feature-cards {
+    /* Grid Layouts */
+    .feature-cards,
+    .stat-container,
+    .timeline,
+    .team-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 40px;
-      margin: 40px 0;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+      width: 100%;
     }
 
-    .feature-card {
+    /* Cards */
+    .feature-card,
+    .stat-item,
+    .timeline-item,
+    .team-member {
       background: var(--secondary-color);
-      border-radius: 12px;
-      padding: 30px;
-      min-height: 250px;
+      padding: 20px;
+      border-radius: 8px;
       border: 1px solid var(--border-color);
-      box-shadow: var(--card-shadow);
-      transition: all 0.3s ease;
+      text-align: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--card-hover-shadow);
+    .feature-card h3,
+    .stat-item h3,
+    .timeline-item h3,
+    .team-member h3 {
+      margin-bottom: 15px;
+      text-align: center;
     }
 
-    .feature-card h3 {
-      font-size: 1.4em;
-      margin-bottom: 0.8em;
-    }
-
-    .feature-card p {
-      font-size: 1.1em;
-      line-height: 1.6;
+    .feature-card p,
+    .stat-item p,
+    .timeline-item p,
+    .team-member p {
+      margin: 0;
       color: var(--text-secondary);
     }
 
     /* Statistics */
-    .stat-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 40px;
-      margin: 40px 0;
-    }
-
-    .stat-item {
-      background: var(--secondary-color);
-      padding: 40px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--card-shadow);
-    }
-
     .stat-number {
-      font-size: 3em;
-      font-weight: 700;
+      font-size: 2em;
       color: var(--accent-color);
       margin-bottom: 0.3em;
     }
 
     .stat-label {
-      font-size: 1.2em;
-      color: var(--text-secondary);
-      line-height: 1.4;
-    }
-
-    /* Timeline */
-    .timeline {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 40px;
-      margin: 40px 0;
-    }
-
-    .timeline-item {
-      background: var(--secondary-color);
-      padding: 30px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--card-shadow);
-    }
-
-    .timeline-item h3 {
-      font-size: 1.4em;
-      margin-bottom: 0.8em;
-    }
-
-    /* Team Grid */
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 40px;
-      margin: 40px 0;
-    }
-
-    .team-member {
-      background: var(--secondary-color);
-      padding: 30px;
-      border-radius: 12px;
-      text-align: center;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--card-shadow);
-    }
-
-    .team-member h3 {
-      font-size: 1.4em;
-      margin-bottom: 0.5em;
-    }
-
-    .team-member p {
-      font-size: 1.1em;
       color: var(--text-secondary);
     }
 
     /* Call to Action */
     .cta-section {
-      background: var(--secondary-color);
-      padding: 60px;
-      border-radius: 12px;
       text-align: center;
+      background: var(--secondary-color);
+      padding: 40px;
+      border-radius: 8px;
       border: 1px solid var(--border-color);
-      box-shadow: var(--card-shadow);
-      margin: 40px auto;
-      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .cta-section h2 {
-      font-size: 2.2em;
-      margin-bottom: 0.8em;
+      text-align: center;
+      margin-bottom: 20px;
     }
 
     .cta-section p {
-      font-size: 1.3em;
       color: var(--text-secondary);
-      margin-bottom: 1.5em;
-      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    /* Responsive Design */
-    @media screen and (max-width: 1440px) {
-      .reveal {
-        font-size: 24px;
-      }
-
-      .reveal .slides section {
-        padding: 40px 60px;
-      }
-    }
-
-    @media screen and (max-width: 1024px) {
-      .reveal {
-        font-size: 22px;
-      }
-
-      .reveal .slides section {
-        padding: 30px 40px;
-      }
-
-      .title-slide h1 {
-        font-size: 3em;
-      }
-
-      .title-slide h2 {
-        font-size: 1.6em;
-      }
-
-      .feature-cards, .stat-container, .timeline, .team-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      }
-    }
-
+    /* Responsive adjustments */
     @media screen and (max-width: 768px) {
-      .reveal {
-        font-size: 20px;
+      .content-container {
+        width: 95%;
       }
 
       .reveal .slides section {
-        padding: 20px 30px;
+        padding: 10px;
       }
 
-      .title-slide h1 {
-        font-size: 2.5em;
-      }
-
-      .title-slide h2 {
-        font-size: 1.4em;
-      }
-
-      .feature-cards, .stat-container, .timeline, .team-grid {
+      .feature-cards,
+      .stat-container,
+      .timeline,
+      .team-grid {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 15px;
+      }
+
+      .cta-section {
+        padding: 30px 20px;
       }
     }
 
-    /* Progress Bar */
-    .reveal .progress {
-      height: 4px;
-      color: var(--accent-color);
-    }
-
-    /* Navigation Controls */
+    /* RevealJS Controls */
     .reveal .controls {
       color: var(--text-secondary);
     }
 
-    .reveal .controls button {
-      padding: 12px;
-      opacity: 0.7;
-      transition: opacity 0.3s ease;
-    }
-
-    .reveal .controls button:hover {
-      opacity: 1;
-    }
-
-    /* Slide Numbers */
-    .reveal .slide-number {
-      background-color: transparent;
-      font-size: 16px;
-      color: var(--text-secondary);
-      right: 8px;
-      bottom: 8px;
+    .reveal .progress {
+      color: var(--accent-color);
     }
   </style>
 </head>
@@ -366,7 +248,7 @@
     <div class="slides">
       <!-- Title Slide -->
       <section class="title-slide">
-        <div class="content-wrapper">
+        <div class="content-container">
           <h1>PersonalizedLearningPath</h1>
           <h2>Revolutionizing Professional Development Through AI-Driven Learning</h2>
         </div>
@@ -374,7 +256,7 @@
 
       <!-- Problem Section -->
       <section>
-        <div class="content-wrapper">
+        <div class="content-container">
           <h2>The Problem</h2>
           <ul>
             <li>Traditional learning platforms offer one-size-fits-all solutions</li>
@@ -388,57 +270,40 @@
 
       <!-- Solution Section -->
       <section>
-        <h2>Our Solution</h2>
-        <p>PersonalizedLearningPath: An AI-powered platform that creates customized learning journeys for professionals and organizations.</p>
-        <div class="feature-cards">
-          <div class="feature-card">
-            <h3>Personalization</h3>
-            <ul>
-              <li>AI-driven paths</li>
-              <li>Individual goals</li>
-              <li>Adaptive learning</li>
-            </ul>
-          </div>
-          <div class="feature-card">
-            <h3>Analytics</h3>
-            <ul>
-              <li>Progress tracking</li>
-              <li>Skill assessment</li>
-              <li>Performance metrics</li>
-            </ul>
-          </div>
-          <div class="feature-card">
-            <h3>Enterprise</h3>
-            <ul>
-              <li>Team management</li>
-              <li>Custom environments</li>
-              <li>ROI tracking</li>
-            </ul>
+        <div class="content-container">
+          <h2>Our Solution</h2>
+          <div class="feature-cards">
+            <div class="feature-card">
+              <h3>AI-Powered Learning</h3>
+              <p>Personalized learning paths based on individual goals and progress</p>
+            </div>
+            <div class="feature-card">
+              <h3>Progress Analytics</h3>
+              <p>Real-time tracking and adaptive recommendations</p>
+            </div>
+            <div class="feature-card">
+              <h3>Enterprise Solutions</h3>
+              <p>Custom learning environments for organizations</p>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Market Stats -->
       <section>
-        <h2>Market Opportunity</h2>
-        <div class="stat-container">
-          <div class="stat-item">
-            <div class="stat-number">$350B</div>
-            <div class="stat-label">Global E-learning Market by 2025</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">$417B</div>
-            <div class="stat-label">Corporate Training Market by 2027</div>
+        <div class="content-container">
+          <h2>Market Opportunity</h2>
+          <div class="stat-container">
+            <div class="stat-item">
+              <div class="stat-number">$350B</div>
+              <div class="stat-label">Global E-learning Market by 2025</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">$417B</div>
+              <div class="stat-label">Corporate Training Market by 2027</div>
+            </div>
           </div>
         </div>
-        <h3>Target Market</h3>
-        <ul>
-          <li>Individual professionals (25-45 years)</li>
-          <li>Tech companies</li>
-          <li>Enterprise organizations</li>
-          <li>Educational institutions</li>
-          <li>Government agencies</li>
-        </ul>
       </section>
 
       <!-- Growth Timeline -->
@@ -498,41 +363,35 @@
 
       <!-- Team Section -->
       <section>
-        <h2>Our Team</h2>
-        <div class="team-grid">
-          <div class="team-member">
-            <h3>CEO</h3>
-            <p>[Your Name]</p>
-          </div>
-          <div class="team-member">
-            <h3>CTO</h3>
-            <p>[Technical Lead]</p>
-          </div>
-          <div class="team-member">
-            <h3>Head of Product</h3>
-            <p>[Product Lead]</p>
-          </div>
-          <div class="team-member">
-            <h3>Head of Sales</h3>
-            <p>[Sales Lead]</p>
+        <div class="content-container">
+          <h2>Our Team</h2>
+          <div class="team-grid">
+            <div class="team-member">
+              <h3>CEO</h3>
+              <p>[Your Name]</p>
+            </div>
+            <div class="team-member">
+              <h3>CTO</h3>
+              <p>[Technical Lead]</p>
+            </div>
+            <div class="team-member">
+              <h3>Head of Product</h3>
+              <p>[Product Lead]</p>
+            </div>
+            <div class="team-member">
+              <h3>Head of Sales</h3>
+              <p>[Sales Lead]</p>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Call to Action -->
-      <section class="title-slide">
-        <h2>Join Us in Revolutionizing Professional Development</h2>
-        <div class="feature-cards">
-          <div class="feature-card">
-            <h3>Contact</h3>
-            <p>[Your Name]<br>
-            CEO, PersonalizedLearningPath<br>
-            Email: [Your Email]</p>
-          </div>
-          <div class="feature-card">
-            <h3>Connect</h3>
-            <p>Website: [Website URL]<br>
-            LinkedIn: [LinkedIn Profile]</p>
+      <section>
+        <div class="content-container">
+          <div class="cta-section">
+            <h2>Ready to Transform Your Career?</h2>
+            <p>Join thousands of learners who are accelerating their careers with AI-powered personalized learning.</p>
           </div>
         </div>
       </section>
