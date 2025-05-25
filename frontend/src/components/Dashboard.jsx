@@ -461,6 +461,8 @@ const Dashboard = ({ userId, onLogout }) => {
   const [updatingStep, setUpdatingStep] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [nextStepsExpanded, setNextStepsExpanded] = useState(true);
+  const [reviewsExpanded, setReviewsExpanded] = useState(true);
   const dropdownRef = useRef(null);
   const [recommendations, setRecommendations] = useState([]);
   const [insights, setInsights] = useState(null);
@@ -710,11 +712,11 @@ const Dashboard = ({ userId, onLogout }) => {
                 </span>
               </div>
               <div className="relative h-3 bg-gray-800 rounded-full overflow-hidden">
-              <div
+                <div
                   className="absolute left-0 top-0 h-full bg-gradient-to-r from-gray-700 to-gray-600 rounded-full 
                            transition-all duration-700 shadow-lg"
-                style={{ width: `${progressPercent}%` }}
-              />
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             </div>
 
@@ -936,102 +938,130 @@ const Dashboard = ({ userId, onLogout }) => {
             <h2 className="text-2xl font-bold text-gray-100 mb-6">Personalized Recommendations</h2>
             {recommendations.length > 0 ? (
               <div className="space-y-6">
-                {/* Group recommendations by type */}
+                {/* Next Steps */}
                 {recommendations.filter(rec => rec.type === 'next_step').length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                      <FaChevronRight className="text-gray-400" />
-                      Next Steps
-                    </h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {recommendations
-                        .filter(rec => rec.type === 'next_step')
-                        .map((rec, index) => (
-                          <div
-                            key={index}
-                            className={`p-6 bg-gray-900 rounded-2xl border 
-                                      ${rec.priority === 'high' ? 'border-indigo-500/30' : 'border-gray-700'}
-                                      shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
-                                      hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
-                                      transition-all duration-300`}
-                          >
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className={`p-2 rounded-xl ${rec.priority === 'high' ? 'bg-indigo-500/20' : 'bg-gray-800'}`}>
-                                <FaBook className={`text-xl ${rec.priority === 'high' ? 'text-indigo-400' : 'text-gray-200'}`} />
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2">
+                        <FaChevronRight className="text-gray-400" />
+                        Next Steps
+                      </h3>
+                      <button
+                        onClick={() => setNextStepsExpanded(!nextStepsExpanded)}
+                        className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                      >
+                        {nextStepsExpanded ? (
+                          <FaChevronUp className="text-gray-400" />
+                        ) : (
+                          <FaChevronDown className="text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                    {nextStepsExpanded && (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {recommendations
+                          .filter(rec => rec.type === 'next_step')
+                          .map((rec, index) => (
+                            <div
+                              key={index}
+                              className={`p-6 bg-gray-900 rounded-2xl border 
+                                        ${rec.priority === 'high' ? 'border-indigo-500/30' : 'border-gray-700'}
+                                        shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
+                                        hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
+                                        transition-all duration-300`}
+                            >
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className={`p-2 rounded-xl ${rec.priority === 'high' ? 'bg-indigo-500/20' : 'bg-gray-800'}`}>
+                                  <FaBook className={`text-xl ${rec.priority === 'high' ? 'text-indigo-400' : 'text-gray-200'}`} />
+                                </div>
+                                <div>
+                                  <h3 className="font-medium text-gray-100">{rec.step.title}</h3>
+                                  <p className="text-sm text-gray-400">Step {rec.step_index + 1}</p>
+                                </div>
                               </div>
-                              <div>
-                                <h3 className="font-medium text-gray-100">{rec.step.title}</h3>
-                                <p className="text-sm text-gray-400">Step {rec.step_index + 1}</p>
-                              </div>
-                            </div>
-                            <p className="text-gray-300 mb-4">{rec.step.description}</p>
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <FaClock />
-                                <span>{rec.context.estimated_time}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <FaChartLine />
-                                <span>Difficulty: {rec.context.difficulty}/5</span>
-                                {rec.context.difficulty_match && (
-                                  <span className="ml-2 px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
-                                    Matches your level
-                                  </span>
+                              <p className="text-gray-300 mb-4">{rec.step.description}</p>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2 text-sm text-gray-400">
+                                  <FaClock />
+                                  <span>{rec.context.estimated_time}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-400">
+                                  <FaChartLine />
+                                  <span>Difficulty: {rec.context.difficulty}/5</span>
+                                  {rec.context.difficulty_match && (
+                                    <span className="ml-2 px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
+                                      Matches your level
+                                    </span>
+                                  )}
+                                </div>
+                                {rec.context.skills_to_gain.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 mt-3">
+                                    {rec.context.skills_to_gain.map((skill, i) => (
+                                      <span key={i} className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300">
+                                        {skill}
+                                      </span>
+                                    ))}
+                                  </div>
                                 )}
                               </div>
-                              {rec.context.skills_to_gain.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-3">
-                                  {rec.context.skills_to_gain.map((skill, i) => (
-                                    <span key={i} className="px-2 py-1 bg-gray-800 rounded-full text-xs text-gray-300">
-                                      {skill}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
                             </div>
-                          </div>
-                        ))}
-                    </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Review Suggestions */}
                 {recommendations.filter(rec => rec.type === 'review').length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                      <FaSync className="text-gray-400" />
-                      Suggested Reviews
-                    </h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {recommendations
-                        .filter(rec => rec.type === 'review')
-                        .map((rec, index) => (
-                          <div
-                            key={index}
-                            className="p-6 bg-gray-900 rounded-2xl border border-yellow-500/30
-                                      shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
-                                      hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
-                                      transition-all duration-300"
-                          >
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="p-2 bg-yellow-500/20 rounded-xl">
-                                <FaSync className="text-xl text-yellow-400" />
-                              </div>
-                              <div>
-                                <h3 className="font-medium text-gray-100">{rec.step.title}</h3>
-                                <p className="text-sm text-gray-400">Completed on {rec.context.completed_at}</p>
-                              </div>
-                            </div>
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <FaChartLine />
-                                <span>Previous Score: {Math.round(rec.context.previous_score)}%</span>
-                              </div>
-                              <p className="text-gray-300">{rec.context.reason}</p>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2">
+                        <FaSync className="text-gray-400" />
+                        Suggested Reviews
+                      </h3>
+                      <button
+                        onClick={() => setReviewsExpanded(!reviewsExpanded)}
+                        className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                      >
+                        {reviewsExpanded ? (
+                          <FaChevronUp className="text-gray-400" />
+                        ) : (
+                          <FaChevronDown className="text-gray-400" />
+                        )}
+                      </button>
                     </div>
+                    {reviewsExpanded && (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {recommendations
+                          .filter(rec => rec.type === 'review')
+                          .map((rec, index) => (
+                            <div
+                              key={index}
+                              className="p-6 bg-gray-900 rounded-2xl border border-yellow-500/30
+                                        shadow-[0_0_15px_3px_rgba(255,255,255,0.1)]
+                                        hover:shadow-[0_0_25px_5px_rgba(255,255,255,0.15)]
+                                        transition-all duration-300"
+                            >
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-yellow-500/20 rounded-xl">
+                                  <FaSync className="text-xl text-yellow-400" />
+                                </div>
+                                <div>
+                                  <h3 className="font-medium text-gray-100">{rec.step.title}</h3>
+                                  <p className="text-sm text-gray-400">Completed on {rec.context.completed_at}</p>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2 text-sm text-gray-400">
+                                  <FaChartLine />
+                                  <span>Previous Score: {Math.round(rec.context.previous_score)}%</span>
+                                </div>
+                                <p className="text-gray-300">{rec.context.reason}</p>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1128,18 +1158,18 @@ const Dashboard = ({ userId, onLogout }) => {
                     onComplete={handleComplete}
                     analytics={typeof stepProgress === 'object' ? stepProgress : null}
                   />
-              );
-            })}
+                );
+              })}
             </div>
           </div>
-          </div>
-        </main>
+        </div>
+      </main>
 
-        <UserDetailsModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          userData={userData}
-        />
+      <UserDetailsModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        userData={userData}
+      />
     </div>
   );
 };
