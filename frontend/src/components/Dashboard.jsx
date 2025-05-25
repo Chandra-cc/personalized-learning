@@ -776,7 +776,6 @@ const Dashboard = ({ userId, onLogout }) => {
                       step.skills_gained.forEach(skill => {
                         // Update skill level based on comprehension score
                         const comprehensionScore = typeof stepProgress === 'object' ? stepProgress.comprehension_score || 0 : 0;
-                        const currentLevel = completedSkills.get(skill) || 0;
                         // Calculate new level based on comprehension (starting from 30%)
                         let levelIncrement;
                         if (comprehensionScore >= 70) {
