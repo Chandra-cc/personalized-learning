@@ -4,6 +4,11 @@ import UserForm from "./components/UserForm";
 import AuthForm from "./components/AuthForm";
 import Dashboard from "./components/Dashboard";
 import CompanyPage from "./components/CompanyPage";
+import config from './config';
+
+// API Configuration
+// const API_BASE_URL = "http://34.227.104.91:5000";  // EC2 URL
+// const API_BASE_URL = "http://localhost:5000";  // Local development URL
 
 function App() {
   const [userId, setUserId] = useState(null);
@@ -13,7 +18,7 @@ function App() {
 
   const checkFormSubmitted = async (id) => {
     try {
-      const res = await axios.get(`http://localhost:5000/user/${id}`);
+      const res = await axios.get(`${config.API_BASE_URL}/user/${id}`);
       const learningPath = res.data.learning_path;
 
       // Check if learning path exists and has items

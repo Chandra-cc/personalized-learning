@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import config from '../config';
 
 const AuthForm = ({ onAuthSuccess, onBackHome }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -14,7 +15,7 @@ const AuthForm = ({ onAuthSuccess, onBackHome }) => {
     const endpoint = mode === "login" ? "/login" : "/signup";
 
     try {
-      const res = await axios.post(`http://localhost:5000${endpoint}`, formData);
+      const res = await axios.post(`${config.API_BASE_URL}${endpoint}`, formData);
       setMessage(res.data.message);
 
       if (res.data.user_id) {

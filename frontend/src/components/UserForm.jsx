@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FaArrowLeft, FaCheck } from "react-icons/fa";
 import "../styles/animations.css";
 import axios from 'axios';
+import config from '../config';
 
 // Helper function to check if a step is complete
 const isStepComplete = (formData, step) => {
@@ -162,7 +163,7 @@ const UserForm = ({ userId, onSubmitSuccess, onBackHome }) => {
         throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
       }
 
-      const response = await axios.post('http://localhost:5000/submit-user-data', {
+      const response = await axios.post(`${config.API_BASE_URL}/submit-user-data`, {
         user_id: userId,
         ...formData
       });
