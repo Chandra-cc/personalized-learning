@@ -1,37 +1,100 @@
 #!/bin/bash
 
-echo "Starting the application..."
+# Create logs directory if it doesn't exist
+mkdir -p logs
+
+# Log file paths
+BACKEND_LOG="logs/backend.log"
+FRONTEND_LOG="logs/frontend.log"
+ERROR_LOG="logs/error.log"
+
+echo "Starting the application..." | tee -a $ERROR_LOG
+
+# Kill any existing processes
+echo "Cleaning up existing processes..." | tee -a $ERROR_LOG
+pkill -f "python run.py"
+pkill -f "node.*start"
 
 # Activate virtual environment
-source venv/bin/activate
+source venv/bin/activate || {
+    echo "Failed to activate virtual environment" | tee -a $ERROR_LOG
+    exit 1
+}
 
 # Start backend Flask server
-cd backend
-python run.py &
+echo "Starting backend server..." | tee -a $ERROR_LOG
+cd backend || {
+    echo "Failed to change to backend directory" | tee -a $ERROR_LOG
+    exit 1
+}
+
+# Install backend dependencies
+pip install -r requirements.txt >> $BACKEND_LOG 2>&1 || {
+    echo "Failed to install backend dependencies" | tee -a $ERROR_LOG
+    exit 1
+}
+
+# Start backend with nohup
+nohup python run.py >> $BACKEND_LOG 2>&1 &
 BACKEND_PID=$!
 cd ..
 
+# Verify backend started successfully
+sleep 5
+if ! ps -p $BACKEND_PID > /dev/null; then
+    echo "Backend failed to start. Check $BACKEND_LOG for details" | tee -a $ERROR_LOG
+    exit 1
+fi
+
 # Start frontend development server
-cd frontend
-npm install
-# Set environment variables for React to bind to all interfaces
+echo "Starting frontend server..." | tee -a $ERROR_LOG
+cd frontend || {
+    echo "Failed to change to frontend directory" | tee -a $ERROR_LOG
+    exit 1
+}
+
+# Install frontend dependencies
+npm install >> $FRONTEND_LOG 2>&1 || {
+    echo "Failed to install frontend dependencies" | tee -a $ERROR_LOG
+    exit 1
+}
+
+# Set environment variables for React
 export PORT=3000
 export HOST=0.0.0.0
-# Start React with host binding
-HOST=0.0.0.0 npm start &
+
+# Start React with nohup
+nohup npm start >> $FRONTEND_LOG 2>&1 &
 FRONTEND_PID=$!
 cd ..
 
-echo "Both servers are starting..."
-echo "Backend PID: $BACKEND_PID"
-echo "Frontend PID: $FRONTEND_PID"
-echo "To stop the servers, run: kill $BACKEND_PID $FRONTEND_PID"
-echo ""
-echo "Your application should be accessible at:"
-echo "Frontend: http://<your-ec2-public-ip>:3000"
-echo "Backend: http://<your-ec2-public-ip>:5000"
-echo ""
-echo "Make sure your EC2 security group allows inbound traffic on ports 3000 and 5000"
+# Verify frontend started successfully
+sleep 10
+if ! ps -p $FRONTEND_PID > /dev/null; then
+    echo "Frontend failed to start. Check $FRONTEND_LOG for details" | tee -a $ERROR_LOG
+    kill $BACKEND_PID
+    exit 1
+fi
 
-# Keep the script running to maintain the background processes
-wait 
+# Save PIDs to a file for later use
+echo "$BACKEND_PID" > logs/backend.pid
+echo "$FRONTEND_PID" > logs/frontend.pid
+
+echo "Application started successfully!" | tee -a $ERROR_LOG
+echo "----------------------------------------" | tee -a $ERROR_LOG
+echo "Backend PID: $BACKEND_PID (saved to logs/backend.pid)" | tee -a $ERROR_LOG
+echo "Frontend PID: $FRONTEND_PID (saved to logs/frontend.pid)" | tee -a $ERROR_LOG
+echo "" | tee -a $ERROR_LOG
+echo "Log files:" | tee -a $ERROR_LOG
+echo "Backend log: $BACKEND_LOG" | tee -a $ERROR_LOG
+echo "Frontend log: $FRONTEND_LOG" | tee -a $ERROR_LOG
+echo "Error log: $ERROR_LOG" | tee -a $ERROR_LOG
+echo "" | tee -a $ERROR_LOG
+echo "Your application should be accessible at:" | tee -a $ERROR_LOG
+echo "Frontend: http://<your-ec2-public-ip>:3000" | tee -a $ERROR_LOG
+echo "Backend: http://<your-ec2-public-ip>:5000" | tee -a $ERROR_LOG
+echo "" | tee -a $ERROR_LOG
+echo "To stop the servers, run: kill \$(cat logs/backend.pid) \$(cat logs/frontend.pid)" | tee -a $ERROR_LOG
+echo "Make sure your EC2 security group allows inbound traffic on ports 3000 and 5000" | tee -a $ERROR_LOG
+
+# Script will exit but services continue running in background 

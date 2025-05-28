@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, memo, useCallback } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import config from '../config';
 import {
   FaCheckCircle,
   FaBook,
@@ -482,16 +483,16 @@ const Dashboard = ({ userId, onLogout }) => {
       try {
         console.log('Fetching user data and analytics...');
         const [userRes, analyticsRes, recommendationsRes, insightsRes] = await Promise.all([
-          axios.get(`http://localhost:5000/user/${userId}`),
-          axios.get(`http://localhost:5000/analytics/${userId}`).catch(err => {
+          axios.get(`${config.API_BASE_URL}/user/${userId}`),
+          axios.get(`${config.API_BASE_URL}/analytics/${userId}`).catch(err => {
             console.warn('Failed to fetch analytics:', err);
             return { data: null };
           }),
-          axios.get(`http://localhost:5000/dashboard-recommendations/${userId}`).catch(err => {
+          axios.get(`${config.API_BASE_URL}/dashboard-recommendations/${userId}`).catch(err => {
             console.warn('Failed to fetch recommendations:', err);
             return { data: { recommendations: [] } };
           }),
-          axios.get(`http://localhost:5000/insights/${userId}`).catch(err => {
+          axios.get(`${config.API_BASE_URL}/insights/${userId}`).catch(err => {
             console.warn('Failed to fetch insights:', err);
             return { data: null };
           })
@@ -563,7 +564,7 @@ const Dashboard = ({ userId, onLogout }) => {
     try {
       console.log('Sending progress update:', { step_index: index, ...progressData });
       
-      const response = await axios.post(`http://localhost:5000/update-progress/${userId}`, {
+      const response = await axios.post(`${config.API_BASE_URL}/update-progress/${userId}`, {
         step_index: index,
         ...progressData
       });
@@ -598,7 +599,7 @@ const Dashboard = ({ userId, onLogout }) => {
       // Refresh recommendations after completing a step
       try {
         console.log('Fetching updated recommendations...');
-        const recommendationsRes = await axios.get(`http://localhost:5000/recommendations/${userId}`);
+        const recommendationsRes = await axios.get(`${config.API_BASE_URL}/recommendations/${userId}`);
         console.log('New recommendations:', recommendationsRes.data);
         setRecommendations(recommendationsRes.data.recommendations || []);
       } catch (err) {
@@ -606,7 +607,7 @@ const Dashboard = ({ userId, onLogout }) => {
       }
 
       // Refresh user data to ensure sync
-      const userRes = await axios.get(`http://localhost:5000/user/${userId}`);
+      const userRes = await axios.get(`${config.API_BASE_URL}/user/${userId}`);
       setUserData(userRes.data);
       
     } catch (err) {
