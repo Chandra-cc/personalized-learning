@@ -23,7 +23,7 @@ if [ ! -d "models" ]; then
 fi
 
 # Check if model exists, if not download it using download_model.py
-MODEL_PATH="models/llama-2-7b-chat.Q4_K_M.gguf"
+MODEL_PATH="models/models--facebook--blenderbot-400M-distill"
 if [ ! -f "$MODEL_PATH" ]; then
     echo "Model not found. Running download_model.py..."
     python download_model.py
