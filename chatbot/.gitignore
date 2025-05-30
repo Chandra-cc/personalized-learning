@@ -1,0 +1,40 @@
+# LLaMA Model Files
+backend/models/llama*
+backend/models/*.gguf
+backend/models/*.bin
+backend/models/*.pth
+backend/models/*.model
+backend/models/*.onnx
+backend/models/*.safetensors
+backend/models/model_weights/
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.env
+.env.local
+venv/
+ENV/
+.venv
+env/
+backend/venv/
+*/venv/
+
+# Node
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/ 
