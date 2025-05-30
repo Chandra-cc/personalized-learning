@@ -1,12 +1,5 @@
 # LLaMA Model Files
-backend/models/llama*
-backend/models/*.gguf
-backend/models/*.bin
-backend/models/*.pth
-backend/models/*.model
-backend/models/*.onnx
-backend/models/*.safetensors
-backend/models/model_weights/
+backend/models/
 
 # Python
 __pycache__/

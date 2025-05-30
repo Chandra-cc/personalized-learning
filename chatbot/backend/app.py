@@ -1,16 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from llama_cpp import Llama
+from transformers import pipeline
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize the model (will download if not present)
-MODEL_PATH = "models/llama-2-7b-chat.Q4_K_M.gguf"
-
-# Create models directory if it doesn't exist
-os.makedirs("models", exist_ok=True)
+# Initialize the model
+MODEL_NAME = "facebook/blenderbot-400M-distill"  # Much smaller distilled model
+generator = pipeline('text-generation', model=MODEL_NAME, device=-1)  # -1 means CPU
 
 # System prompt for learning path assistant
 SYSTEM_PROMPT = """You are a helpful learning path assistant. Your role is to guide users in their learning journey by:
@@ -20,17 +18,8 @@ SYSTEM_PROMPT = """You are a helpful learning path assistant. Your role is to gu
 4. Breaking down complex topics into manageable steps
 Keep responses concise and focused on creating learning paths."""
 
-# Initialize Llama model with 4-bit quantization
-llm = Llama(
-    model_path=MODEL_PATH,
-    n_ctx=2048,  # Reduced context size for memory efficiency
-    n_threads=4,  # Adjust based on available CPU cores
-    n_gpu_layers=0  # CPU only
-)
-
 def create_prompt(user_message):
-    return f"""<s>[INST] <<SYS>>{SYSTEM_PROMPT}<</SYS>>
-{user_message}[/INST]"""
+    return f"{SYSTEM_PROMPT}\n\nUser: {user_message}\nAssistant:"
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
@@ -45,17 +34,16 @@ def chat():
         prompt = create_prompt(user_message)
         
         # Generate response
-        response = llm(
+        response = generator(
             prompt,
-            max_tokens=256,  # Limit response length
+            max_length=256,
+            num_return_sequences=1,
             temperature=0.7,
-            top_p=0.95,
-            stop=["</s>", "[INST]"],  # Stop at end of response
-            echo=False
+            do_sample=True
         )
 
         # Extract the generated text
-        bot_response = response['choices'][0]['text'].strip()
+        bot_response = response[0]['generated_text'].strip()
         
         return jsonify({
             'response': bot_response,

@@ -1,31 +1,39 @@
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import os
-import requests
 from tqdm import tqdm
 
-MODEL_URL = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf"
-MODEL_PATH = "models/llama-2-7b-chat.Q4_K_M.gguf"
+MODEL_NAME = "facebook/blenderbot-400M-distill"
+CACHE_DIR = "models"
 
-def download_file():
-    os.makedirs("models", exist_ok=True)
-    
-    print(f"Downloading model to {MODEL_PATH}...")
-    response = requests.get(MODEL_URL, stream=True)
-    total_size = int(response.headers.get('content-length', 0))
-    
-    with open(MODEL_PATH, 'wb') as file, tqdm(
-        desc="Downloading",
-        total=total_size,
-        unit='iB',
-        unit_scale=True,
-        unit_divisor=1024,
-    ) as progress_bar:
-        for data in response.iter_content(chunk_size=1024):
-            size = file.write(data)
-            progress_bar.update(size)
+def download_model():
+    """Download and cache the model and tokenizer"""
+    try:
+        # Create cache directory if it doesn't exist
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        
+        print(f"Downloading model {MODEL_NAME}...")
+        
+        # Download and cache the tokenizer
+        print("Downloading tokenizer...")
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR)
+        
+        # Download and cache the model
+        print("Downloading model...")
+        model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME, cache_dir=CACHE_DIR)
+        
+        print(f"Model and tokenizer successfully downloaded to {CACHE_DIR}")
+        return True
+        
+    except Exception as e:
+        print(f"Error downloading model: {str(e)}")
+        return False
 
 if __name__ == "__main__":
-    if os.path.exists(MODEL_PATH):
-        print(f"Model already exists at {MODEL_PATH}")
+    if os.path.exists(os.path.join(CACHE_DIR, MODEL_NAME.split('/')[-1])):
+        print(f"Model already exists in {CACHE_DIR}")
     else:
-        download_file()
-        print("Download complete!") 
+        success = download_model()
+        if success:
+            print("Download complete!")
+        else:
+            print("Download failed. Please try again.") 
