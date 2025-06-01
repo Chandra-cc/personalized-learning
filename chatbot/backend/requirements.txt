@@ -9,3 +9,4 @@ numpy<2.0.0
 transformers==4.37.2
 --find-links https://download.pytorch.org/whl/torch_stable.html
 torch==2.2.0+cpu
+Flask-Limiter==3.10.0
