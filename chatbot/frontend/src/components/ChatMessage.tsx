@@ -69,10 +69,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     return (
         <MessageContainer isUser={isUser}>
             <Avatar isUser={isUser}>
-                {isUser ? 'Y' : '🤖'}
+                {isUser ? 'U' : '🤖'}
             </Avatar>
             <MessageBubble isUser={isUser}>
-                {!isUser && <BotName>EduAI</BotName>}
+                {!isUser && <BotName>Elai</BotName>}
                 {message.text}
                 <Timestamp>
                     {new Date(message.timestamp).toLocaleTimeString()}
