@@ -11,7 +11,7 @@ class Config:
     # Flask settings
     DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 't')
     HOST = os.getenv('FLASK_HOST', '0.0.0.0')
-    PORT = int(os.getenv('FLASK_PORT', 5000))
+    PORT = int(os.getenv('FLASK_PORT', 5001))
 
     # CORS settings
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*').split(',')

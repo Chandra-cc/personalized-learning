@@ -217,7 +217,7 @@ export const Chat: React.FC = () => {
         setInput('');
 
         try {
-            const response = await axios.post('http://localhost:5000/api/chat', {
+            const response = await axios.post('http://localhost:5001/api/chat', {
                 message: userMessage.text
             });
 
